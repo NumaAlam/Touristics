@@ -7,7 +7,8 @@ import java.util.Scanner;
 public class Main {
     static void main(String args[]) throws FileNotFoundException {
 
-        String path = "src/main/resources/hotels.txt";
+        String path = "src/ma" +
+                "in/resources/hotels.txt";
         Scanner sc = new Scanner(new File(path));
 
         while (sc.hasNextLine()) {

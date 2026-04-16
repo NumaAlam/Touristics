@@ -1,17 +1,17 @@
 package hotels;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.util.List;
 
 public class Main {
     static void main(String args[]) throws FileNotFoundException {
 
-        String path = "src/main/resources/hotels.txt";
-        Scanner sc = new Scanner(new File(path));
+        List<Hotel> hotels = Hotellimporter.loadHotelsFromFile();
 
-        while (sc.hasNextLine()) {
-            System.out.println(sc.nextLine());
+        for (int i = 0; i < hotels.size(); i++) {
+            System.out.println(hotels.get(i));
         }
     }
+
+
 }

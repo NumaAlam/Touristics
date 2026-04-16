@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 
-
 @Data
 @AllArgsConstructor
 
@@ -21,5 +20,9 @@ public class Hotel {
     private final int noRooms;
     private final int noBeds;
 
+
+    public String toCSV() {
+        return ""+id+","+category+","+name+","+owner+","+contact+","+address+","+city+","+cityCode+","+phone+","+noRooms+","+noBeds+"";
+    }
 
 }

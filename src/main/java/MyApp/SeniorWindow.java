@@ -12,7 +12,7 @@ public class SeniorWindow extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JButton menuButton = new JButton("Menu");
+        JButton menuButton = new JButton("Main Menu");
         menuButton.addActionListener(e -> {
             new Menu().setVisible(true);
             dispose();

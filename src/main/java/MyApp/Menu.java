@@ -3,11 +3,13 @@ package MyApp;
 import US1.Table;
 
 import javax.swing.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Menu extends JFrame {
 
     JMenuBar menuBar = new JMenuBar();
-    JMenu menu = new JMenu("File");
+    JMenu menu = new JMenu("Menu");
     JMenuItem fileMenu = new JMenuItem("Help");
     JMenuItem exitMenuItem = new JMenuItem("Exit");
     JMenuItem capacityMenuItem = new JMenuItem("Master Data");
@@ -23,7 +25,7 @@ public class Menu extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         capacityMenuItem.addActionListener(e -> {
-           new Table().setVisible(true);
+           new US1.Table().setVisible(true);
         });
         exitMenuItem.addActionListener(e -> {
             dispose();
@@ -31,6 +33,14 @@ public class Menu extends JFrame {
         });
         occupancyMenuItem.addActionListener(e -> {
             new US2.Table().setVisible(true);
+        });
+        fileMenu.addActionListener(e -> {
+            try {
+                String text = Files.readString(Path.of("src/main/resources/help.txt"));
+                JOptionPane.showMessageDialog(this, text, "Help", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "help.txt konnte nicht geladen werden.");
+            }
         });
     }
 

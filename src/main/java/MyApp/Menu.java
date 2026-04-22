@@ -1,7 +1,5 @@
 package MyApp;
 
-import US1.Table;
-
 import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,13 +8,13 @@ public class Menu extends JFrame {
 
     JMenuBar menuBar = new JMenuBar();
     JMenu menu = new JMenu("Menu");
-    JMenuItem fileMenu = new JMenuItem("Help");
+    JMenuItem helpMenuItem = new JMenuItem("Help");
     JMenuItem exitMenuItem = new JMenuItem("Exit");
     JMenuItem capacityMenuItem = new JMenuItem("Master Data");
     JMenuItem occupancyMenuItem = new JMenuItem("Transactional Data");
     public Menu() {
         setSize(300, 200);
-        menu.add(fileMenu);
+        menu.add(helpMenuItem);
         menu.add(capacityMenuItem);
         menu.add(occupancyMenuItem);
         menu.add(exitMenuItem);
@@ -34,7 +32,7 @@ public class Menu extends JFrame {
         occupancyMenuItem.addActionListener(e -> {
             new US2.Table().setVisible(true);
         });
-        fileMenu.addActionListener(e -> {
+        helpMenuItem.addActionListener(e -> {
             try {
                 String text = Files.readString(Path.of("src/main/resources/help.txt"));
                 JOptionPane.showMessageDialog(this, text, "Help", JOptionPane.INFORMATION_MESSAGE);

@@ -45,7 +45,6 @@ public class LoginWindow extends JFrame {
                 }
 
 
-                System.out.println("Login");
             });
 
 

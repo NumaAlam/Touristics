@@ -1,5 +1,5 @@
 package hotels;
-/*
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -26,4 +26,3 @@ public class Hotel {
     }
 
 }
-*/

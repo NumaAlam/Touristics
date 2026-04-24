@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
@@ -14,14 +15,14 @@ public class Table extends JFrame{
     JTable table;
     static DefaultTableModel model;
     
-    public Table() {
+    public Table(int hotelID, int year, int month, String category) {
         defineFrame();
 
         initComponents();
 
         addActions();
 
-        fillTable();
+        fillTable(hotelID, year, month, category);
 
         addComponents();
 
@@ -69,19 +70,35 @@ public class Table extends JFrame{
         });
     }
 
-    private static void fillTable() {
-        LocalDate today = LocalDate.now();
-        model.addColumn("Category");
-        model.addColumn("Rooms");
-        model.addColumn("Room occupancy");
-        model.addColumn("Beds");
-        model.addColumn("Bed occupancy");
-        model.addRow(new String[]{"*****", "3.945", "53,2", "7.863", "41,1"});
-        model.addRow(new String[]{"****", "16.077", "51,6", "31.350", "40,7"});
-        model.addRow(new String[]{"***", "10.422", "48,6", "20.401", "38,2"});
-        model.addRow(new String[]{"** & *", "2.468", "48,5", "5.293", "34,8"});
-        model.addRow(new String[]{"Total " + YearMonth.from(LocalDate.now()), "32.878", "50,7", "64.907", "39,5"});
-        model.addRow(new String[]{"Total " + YearMonth.from(today.minusYears(1)), "31.820", "50,1", "62.819", "39,0"});
+    private static void fillTable(int hotelID, int year, int month, String category) {
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
+                "dev",
+                "dev")) {
+            Statement stmt = conn.createStatement();
+
+            ResultSet rs = stmt.executeQuery("");
+
+            // 1. Spaltennamen dynamisch holen
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            for (int i = 1; i <= columnCount; i++) {
+                // Holt die Namen aus dem "AS ..." Teil deines SQLs
+                model.addColumn(metaData.getColumnLabel(i));
+            }
+
+            // 2. Zeilen dynamisch füllen
+            while (rs.next()) {
+                String[] row = new String[columnCount];
+                for (int i = 1; i <= columnCount; i++) {
+                    row[i - 1] = rs.getString(i);
+                }
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
+        }
     }
 
     private void defineFrame() {

@@ -30,7 +30,7 @@ public class Menu extends JFrame {
             new SeniorWindow("Welcome Senior").setVisible(true);
         });
         occupancyMenuItem.addActionListener(e -> {
-            new US2.Table().setVisible(true);
+            new US2.TableDateChooser().setVisible(true);
         });
         helpMenuItem.addActionListener(e -> {
             try {

@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.*;
 
 public class Table extends JFrame {
     JTable table;
@@ -63,15 +64,49 @@ public class Table extends JFrame {
     }
 
     private void fillTable() {
-        model.addColumn("Category");
-        model.addColumn("Number of Establishments");
-        model.addColumn("Rooms");
-        model.addColumn("Beds");
-        model.addRow(new String[]{"*****", "21", "3.945", "7.863"});
-        model.addRow(new String[]{"****", "165", "16.008", "31.216"});
-        model.addRow(new String[]{"***", "174", "10.769", "21.080"});
-        model.addRow(new String[]{"** & *", "74", "2.888", "6.193"});
-        model.addRow(new String[]{"Total", "434", "33.610", "66.352"});
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
+                "dev",
+                "dev")) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT \n" +
+                    "    ISNULL(Combined, 'Total') AS Category,\n" +
+                    "    COUNT(*) AS Establishments,\n" +
+                    "    SUM(noRooms) AS Rooms,\n" +
+                    "    SUM(noBeds) AS Beds\n" +
+                    "FROM (\n" +
+                    "    SELECT \n" +
+                    "        CASE \n" +
+                    "            WHEN category IN ('*', '**') THEN '* & **' \n" +
+                    "            ELSE category \n" +
+                    "        END AS Combined,\n" +
+                    "        noRooms,\n" +
+                    "        noBeds\n" +
+                    "    FROM hotels\n" +
+                    ") AS Sub\n" +
+                    "GROUP BY ROLLUP(Combined)\n" +
+                    "ORDER BY GROUPING(Combined) ASC, Category DESC;");
+
+            // 1. Spaltennamen dynamisch holen
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            for (int i = 1; i <= columnCount; i++) {
+                // Holt die Namen aus dem "AS ..." Teil deines SQLs
+                model.addColumn(metaData.getColumnLabel(i));
+            }
+
+            // 2. Zeilen dynamisch füllen
+            while (rs.next()) {
+                String[] row = new String[columnCount];
+                for (int i = 1; i <= columnCount; i++) {
+                    row[i - 1] = rs.getString(i);
+                }
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
+        }
     }
 
     private void initComponents() {

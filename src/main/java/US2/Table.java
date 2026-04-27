@@ -22,11 +22,28 @@ public class Table extends JFrame{
 
         addActions();
 
-        fillTable(hotelID, year, month, category);
+        fillTable_noSQL();
+
+        //fillTable_SQL(hotelID, year, month, category);
 
         addComponents();
 
         backButton();
+    }
+
+    private void fillTable_noSQL() {
+        LocalDate today = LocalDate.now();
+        model.addColumn("Category");
+        model.addColumn("Rooms");
+        model.addColumn("Room occupancy");
+        model.addColumn("Beds");
+        model.addColumn("Bed occupancy");
+        model.addRow(new String[]{"*****", "3.945", "53,2", "7.863", "41,1"});
+        model.addRow(new String[]{"****", "16.077", "51,6", "31.350", "40,7"});
+        model.addRow(new String[]{"***", "10.422", "48,6", "20.401", "38,2"});
+        model.addRow(new String[]{"** & *", "2.468", "48,5", "5.293", "34,8"});
+        model.addRow(new String[]{"Total " + YearMonth.from(LocalDate.now()), "32.878", "50,7", "64.907", "39,5"});
+        model.addRow(new String[]{"Total " + YearMonth.from(today.minusYears(1)), "31.820", "50,1", "62.819", "39,0"});
     }
 
     private void addActions() {
@@ -70,7 +87,7 @@ public class Table extends JFrame{
         });
     }
 
-    private static void fillTable(int hotelID, int year, int month, String category) {
+    private static void fillTable_SQL(int hotelID, int year, int month, String category) {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
                 "dev",

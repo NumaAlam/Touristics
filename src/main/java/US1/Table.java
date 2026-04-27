@@ -72,8 +72,8 @@ public class Table extends JFrame {
             ResultSet rs = stmt.executeQuery("SELECT \n" +
                     "    ISNULL(Combined, 'Total') AS Category,\n" +
                     "    COUNT(*) AS Establishments,\n" +
-                    "    SUM(noRooms) AS Rooms,\n" +
-                    "    SUM(noBeds) AS Beds\n" +
+                    "    AVG(noRooms) AS AverageNoOfRooms,\n" +
+                    "    AVG(noBeds) AS AverageNoOfBeds\n" +
                     "FROM (\n" +
                     "    SELECT \n" +
                     "        CASE \n" +

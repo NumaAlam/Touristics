@@ -111,12 +111,20 @@ public class HotelOverviewWindow extends JFrame {
         JButton editButton = new JButton("Edit selected Hotel");
         JButton backButton = new JButton("Back to Menu");
 
+        //US6
+        JButton transactionButton = new JButton("Add Transaction");
+
         buttonPanel.add(editButton);
         buttonPanel.add(backButton);
+        //US6
+        buttonPanel.add(transactionButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
         addEditButtonFunction(editButton);
         addBackButtonFunction(backButton);
+        //US6
+        addTransactionButtonFunction(transactionButton);
+
 
     }
 
@@ -149,6 +157,23 @@ public class HotelOverviewWindow extends JFrame {
 
     //US 5
 
+    //US6
+    private void addTransactionButtonFunction(JButton transactionButton) {
+        transactionButton.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+
+            if (selectedRow >= 0) {
+                int hotelID = Integer.parseInt(
+                        table.getValueAt(selectedRow, 0).toString()
+                );
+                String hotelName = table.getValueAt(selectedRow, 1).toString();
+
+                new US6.TransactionEntryWindow(hotelID, hotelName).setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a hotel first.");
+            }
+        });
+    }
 
 }
 

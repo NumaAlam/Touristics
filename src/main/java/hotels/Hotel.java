@@ -8,17 +8,17 @@ import lombok.Data;
 @AllArgsConstructor
 
 public class Hotel {
-    private final int id;
-    private final String category;
-    private final String name;
-    private final String owner;
-    private final String contact;
-    private final String address;
-    private final String city;
-    private final String cityCode;
-    private final String phone;
-    private final int noRooms;
-    private final int noBeds;
+    int id;
+    String category;
+    String name;
+    String owner;
+    String contact;
+    String address;
+    String city;
+    String cityCode;
+    String phone;
+    int noRooms;
+    int noBeds;
 
 
     public String toCSV() {

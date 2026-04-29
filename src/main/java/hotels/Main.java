@@ -2,16 +2,17 @@ package hotels;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
     static void main(String args[]) throws FileNotFoundException {
 
-        String path = "src/main/resources/hotels.txt";
-        Scanner sc = new Scanner(new File(path));
+        ArrayList<Hotel> ALL_HOTELS = HotelUtilities.getHotels();
 
-        while (sc.hasNextLine()) {
-            System.out.println(sc.nextLine());
-        }
+        ALL_HOTELS.forEach(System.out::println);
     }
+
+
 }

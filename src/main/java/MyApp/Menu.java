@@ -13,6 +13,9 @@ public class Menu extends JFrame {
     JMenuItem capacityMenuItem = new JMenuItem("Master Data");
     JMenuItem occupancyMenuItem = new JMenuItem("Transactional Data");
     JMenuItem addHotelMenuItem = new JMenuItem("Add Hotel");
+
+    JMenuItem hotelOverviewMenuItem = new JMenuItem("Hotel Overview");
+
     public Menu() {
         setSize(300, 200);
         menu.add(helpMenuItem);
@@ -20,6 +23,8 @@ public class Menu extends JFrame {
         menu.add(occupancyMenuItem);
         menu.add(addHotelMenuItem);
         menu.add(exitMenuItem);
+        menu.add(hotelOverviewMenuItem);
+
 
         menuBar.add(menu);
         setJMenuBar(menuBar);
@@ -48,6 +53,11 @@ public class Menu extends JFrame {
                 JOptionPane.showMessageDialog(this, "help.txt konnte nicht geladen werden.");
             }
         });
+        hotelOverviewMenuItem.addActionListener(e -> {
+            new us4_us5.HotelOverviewWindow().setVisible(true);
+        });
+
+
     }
 
 }

@@ -12,12 +12,15 @@ public class Menu extends JFrame {
     JMenuItem exitMenuItem = new JMenuItem("Exit");
     JMenuItem capacityMenuItem = new JMenuItem("Master Data");
     JMenuItem occupancyMenuItem = new JMenuItem("Transactional Data");
+    JMenuItem addHotelMenuItem = new JMenuItem("Add Hotel");
     public Menu() {
         setSize(300, 200);
         menu.add(helpMenuItem);
         menu.add(capacityMenuItem);
         menu.add(occupancyMenuItem);
+        menu.add(addHotelMenuItem);
         menu.add(exitMenuItem);
+
         menuBar.add(menu);
         setJMenuBar(menuBar);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -32,6 +35,11 @@ public class Menu extends JFrame {
         occupancyMenuItem.addActionListener(e -> {
             new US2.TableDateChooser().setVisible(true);
         });
+
+        addHotelMenuItem.addActionListener(e -> {
+            new US3.AddHotelWindow().setVisible(true);
+        });
+
         helpMenuItem.addActionListener(e -> {
             try {
                 String text = Files.readString(Path.of("src/main/resources/help.txt"));

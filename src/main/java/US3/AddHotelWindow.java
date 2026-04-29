@@ -74,22 +74,19 @@ public class AddHotelWindow extends JFrame {
            String noRoom = noRoomField.getText();
            String noBed = noBedField.getText();
 
-           if (category.isBlank() || name.isBlank() || owner.isBlank()
-                   || contact.isBlank() || address.isBlank() || city.isBlank()
-                   || citycode.isBlank() || phone.isBlank() || noRoom.isBlank()
-                   || noBed.isBlank()) {
+           if (HotelValidator.isAnyFieldBlank(category, name, owner, contact, address,
+                   city, citycode, phone, noRoom, noBed)) {
                JOptionPane.showMessageDialog(null, "Bitte alle Felder ausfüllen!");
                return;
            }
-           int noRoomAsNumber, noBedAsNumber;
-           try{
 
-               noRoomAsNumber = Integer.parseInt(noRoom);
-               noBedAsNumber = Integer.parseInt(noBed);
-           }catch (NumberFormatException nfe){
-               JOptionPane.showMessageDialog(null, "ID, noRooms and NoBeds need to be numbers! ");
+           if (!HotelValidator.isPositiveNumber(noRoom) || !HotelValidator.isPositiveNumber(noBed)) {
+               JOptionPane.showMessageDialog(null, "NoRooms and NoBeds must be positive numbers!");
                return;
            }
+
+           int noRoomAsNumber = Integer.parseInt(noRoom);
+           int noBedAsNumber = Integer.parseInt(noBed);
 
            String sql = "INSERT INTO hotels (category, name, owner, contact, address, city, cityCode, phone, noRooms, noBeds) "
                    + "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

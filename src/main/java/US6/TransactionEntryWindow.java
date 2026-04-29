@@ -54,10 +54,21 @@ public class TransactionEntryWindow  extends JFrame {
             String roomOccText = roomOccField.getText().trim();
             String bedOccText = bedOccField.getText().trim();
 
+            // 1. Validierung
+            if(roomsText.isBlank()
+            || bedsText.isBlank()
+                || roomOccText.isBlank()
+                || bedOccText.isBlank()) {
+                JOptionPane.showMessageDialog(this, "Please fill all the fields!");
+                return;
+            }
+
+            // 2. Wenn alles ok ist -> parsen
             int rooms = Integer.parseInt(roomsText);
             int beds = Integer.parseInt(bedsText);
             int roomOcc = Integer.parseInt(roomOccText);
             int bedOcc = Integer.parseInt(bedOccText);
+
             int year = java.time.LocalDate.now().getYear();
             int month = java.time.LocalDate.now().getMonthValue();
 

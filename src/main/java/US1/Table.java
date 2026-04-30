@@ -56,6 +56,8 @@ public class Table extends JFrame {
 
     private void backButton() {
         JButton backButton = new JButton("Close Table");
+        backButton.setPreferredSize(new Dimension(100, 50));
+        backButton.setBackground(new Color(175 ,175,255));
         add(backButton, BorderLayout.SOUTH);
         backButton.addActionListener(e -> {
             dispose();

@@ -10,7 +10,7 @@ public class Menu extends JFrame {
     JMenu menu = new JMenu("Menu");
     JMenuItem helpMenuItem = new JMenuItem("Help");
     JMenuItem exitMenuItem = new JMenuItem("Exit");
-    JMenuItem capacityMenuItem = new JMenuItem("Master Data");
+    JMenuItem capacityMenuItem = new JMenuItem("Master Data Summary");
     JMenuItem occupancyMenuItem = new JMenuItem("Transactional Data");
     JMenuItem addHotelMenuItem = new JMenuItem("Add Hotel");
 
@@ -22,8 +22,8 @@ public class Menu extends JFrame {
         menu.add(capacityMenuItem);
         menu.add(occupancyMenuItem);
         menu.add(addHotelMenuItem);
-        menu.add(exitMenuItem);
         menu.add(hotelOverviewMenuItem);
+        menu.add(exitMenuItem);
 
 
         menuBar.add(menu);
@@ -38,11 +38,15 @@ public class Menu extends JFrame {
             new SeniorWindow("Welcome Senior").setVisible(true);
         });
         occupancyMenuItem.addActionListener(e -> {
-            new US2.TableDateChooser().setVisible(true);
+            new US2.Table().setVisible(true);
         });
 
         addHotelMenuItem.addActionListener(e -> {
             new US3.AddHotelWindow().setVisible(true);
+        });
+
+        hotelOverviewMenuItem.addActionListener(e -> {
+            new us4_us5     .HotelOverviewWindow().setVisible(true);
         });
 
         helpMenuItem.addActionListener(e -> {
@@ -53,10 +57,6 @@ public class Menu extends JFrame {
                 JOptionPane.showMessageDialog(this, "help.txt konnte nicht geladen werden.");
             }
         });
-        hotelOverviewMenuItem.addActionListener(e -> {
-            new us4_us5.HotelOverviewWindow().setVisible(true);
-        });
-
 
 
     }

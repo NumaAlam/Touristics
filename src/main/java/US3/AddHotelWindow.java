@@ -107,9 +107,6 @@ public class AddHotelWindow extends JFrame {
                ps.setString(8,phone );
                ps.setInt(9, noRoomAsNumber);
                ps.setInt(10, noBedAsNumber);
-               // TODO: Hier musst DU die restlichen 9 Felder selbst einfügen!
-               // Reihenfolge wie im SQL: name, owner, contact, address, city, cityCode, phone, noRooms, noBeds
-               // setString für Text, setInt für Zahlen
 
 
                ps.executeUpdate();

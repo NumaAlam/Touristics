@@ -5,6 +5,7 @@ import java.awt.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import US3.HotelValidator;
 
 public class TransactionEntryWindow  extends JFrame {
 
@@ -60,6 +61,14 @@ public class TransactionEntryWindow  extends JFrame {
                 || roomOccText.isBlank()
                 || bedOccText.isBlank()) {
                 JOptionPane.showMessageDialog(this, "Please fill all the fields!");
+                return;
+            }
+
+            if (!HotelValidator.isPositiveNumber(roomsText)
+                    || !HotelValidator.isPositiveNumber(bedsText)
+                    || !HotelValidator.isPositiveNumber(roomOccText)
+                    || !HotelValidator.isPositiveNumber(bedOccText)) {
+                JOptionPane.showMessageDialog(this, "All values must be positive numbers!");
                 return;
             }
 

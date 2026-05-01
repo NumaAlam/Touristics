@@ -2,7 +2,7 @@ package MyApp;
 
 import java.sql.*;
 
-public class Databasemanager {
+public class DatabaseTest {
     static void main() {
 
         try {
@@ -13,7 +13,7 @@ public class Databasemanager {
             );
 
             Statement statement = dbsconnection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM hotels");
+            ResultSet resultSet = statement.executeQuery("SELECT id, name FROM hotels");
 
             while(resultSet.next()) {
                 System.out.println("ID: " + resultSet.getInt("id") + ", Name: " + resultSet.getString("name"));

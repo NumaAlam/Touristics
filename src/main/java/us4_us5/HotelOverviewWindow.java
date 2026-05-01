@@ -131,7 +131,6 @@ public class HotelOverviewWindow extends JFrame {
     private void addBackButtonFunction(JButton backButton) {
         backButton.addActionListener(e -> {
             dispose();
-            new Menu().setVisible(true);
         });
     }
 

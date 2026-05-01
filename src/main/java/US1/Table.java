@@ -61,7 +61,6 @@ public class Table extends JFrame {
         add(backButton, BorderLayout.SOUTH);
         backButton.addActionListener(e -> {
             dispose();
-            new Menu().setVisible(true);
         });
     }
 

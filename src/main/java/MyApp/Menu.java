@@ -16,6 +16,8 @@ public class Menu extends JFrame {
 
     JMenuItem hotelOverviewMenuItem = new JMenuItem("Hotel Overview");
 
+    JMenuItem transactionListMenuItem = new JMenuItem("Transaction List per Hotel");
+
     public Menu() {
         setSize(300, 200);
         menu.add(helpMenuItem);
@@ -23,8 +25,8 @@ public class Menu extends JFrame {
         menu.add(occupancyMenuItem);
         menu.add(addHotelMenuItem);
         menu.add(hotelOverviewMenuItem);
+        menu.add(transactionListMenuItem);
         menu.add(exitMenuItem);
-
 
         menuBar.add(menu);
         setJMenuBar(menuBar);
@@ -56,6 +58,10 @@ public class Menu extends JFrame {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "help.txt konnte nicht geladen werden.");
             }
+        });
+
+        transactionListMenuItem.addActionListener(e -> {
+            new US10.TransactionListWindow().setVisible(true);
         });
 
 

@@ -46,7 +46,7 @@ public class Menu extends JFrame {
         });
 
         hotelOverviewMenuItem.addActionListener(e -> {
-            new us4_us5     .HotelOverviewWindow().setVisible(true);
+            new us4_us5.HotelOverviewWindow().setVisible(true);
         });
 
         helpMenuItem.addActionListener(e -> {

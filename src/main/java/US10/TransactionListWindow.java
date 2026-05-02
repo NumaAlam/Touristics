@@ -163,7 +163,7 @@ public class TransactionListWindow extends JFrame {
         int hotelId = hotelIDs.get(hotelComboBox.getSelectedIndex());
 
         int fromYear = 0;
-        if (!fromYearComboBox.getSelectedItem().equals("All")) {
+        if (!"All".equals(fromYearComboBox.getSelectedItem())) {
             fromYear = Integer.parseInt((String) fromYearComboBox.getSelectedItem());
         }
         int fromMonth = fromMonthComboBox.getSelectedIndex(); // 0 = All, 1 = Jan, ...
@@ -174,8 +174,23 @@ public class TransactionListWindow extends JFrame {
         }
         int toMonth = toMonthComboBox.getSelectedIndex(); // 0 = All, 1 = Jan, ...
 
+
+
+        if (fromYear != 0 && toYear != 0) {
+            if (fromYear > toYear || (fromYear == toYear && fromMonth > toMonth && toMonth != 0)) {
+                JOptionPane.showMessageDialog(this,
+                        "Invalid date range: From must be before To.",
+                        "Invalid Range",
+                        JOptionPane.WARNING_MESSAGE);
+                model.setRowCount(0);
+                return;
+            }
+        }
         fillTable(hotelId, fromYear, fromMonth, toYear, toMonth);
     }
+
+
+
 
     private void fillTable(int hotelId, int fromYear, int fromMonth, int toYear, int toMonth) {
         model.setRowCount(0);

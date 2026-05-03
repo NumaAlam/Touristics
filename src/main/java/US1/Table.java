@@ -18,8 +18,6 @@ public class Table extends JFrame {
 
             initComponents();
 
-            addActions();
-
             fillTable();
 
             addComponents();
@@ -27,25 +25,6 @@ public class Table extends JFrame {
             backButton();
 
 
-    }
-
-    private void addActions() {
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int row = table.getSelectedRow();
-                    if (row >= 0) {
-                        String category = (String) table.getValueAt(row, 0);
-                        String numberOfEstablishments = (String) table.getValueAt(row, 1);
-                        String rooms = (String) table.getValueAt(row, 2);
-                        String beds = (String) table.getValueAt(row, 3);
-
-                        new EditorWindowMasterTable(category, numberOfEstablishments, rooms, beds).setVisible(true);
-                    }
-                }
-            }
-        });
     }
 
 
@@ -121,5 +100,7 @@ public class Table extends JFrame {
         setSize(520, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Current Hotel Capacity. Date - " + java.time.LocalDate.now());
+        setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 }

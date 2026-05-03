@@ -39,24 +39,6 @@
 
 
         private void addActions() {
-            table.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
-                        int row = table.getSelectedRow();
-                        if (row >= 0) {
-                            String category = (String) table.getValueAt(row, 0);
-                            String rooms = (String) table.getValueAt(row, 1);
-                            String roomOccupancy = (String) table.getValueAt(row, 2);
-                            String beds = (String) table.getValueAt(row, 3);
-                            String bedOccupancy = (String) table.getValueAt(row, 4);
-
-                            new EditorWindowTransactionalDate(category, rooms, roomOccupancy, beds, bedOccupancy).setVisible(true);
-                        }
-                    }
-                }
-            });
-
             categoryComboBox.addActionListener(e -> {
                 String selectedCategory = (String) categoryComboBox.getSelectedItem();
                 if (selectedCategory.equals("All")) {

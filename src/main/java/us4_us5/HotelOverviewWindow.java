@@ -156,19 +156,33 @@ public class HotelOverviewWindow extends JFrame {
 
     //US 5
 
-    //US6
+    /**
+     * US6 - Wires up the "Add Transaction" button on the hotel list screen.
+
+     * When clicked, the button reads the currently selected row from the hotel
+     * table, extracts the hotel ID and name, and opens the TransactionEntryWindow
+     * for that hotel.
+
+     * If no row is selected, the user is prompted to select a hotel first.
+
+     * @param transactionButton the button to attach the action listener to
+     */
     private void addTransactionButtonFunction(JButton transactionButton) {
         transactionButton.addActionListener(e -> {
+            // Get the index of the currently selected row in the hotel table (-1 if none selected)
             int selectedRow = table.getSelectedRow();
 
             if (selectedRow >= 0) {
+                // Extract hotel ID (column 0) and hotel name (column 1) from the selected row
                 int hotelID = Integer.parseInt(
                         table.getValueAt(selectedRow, 0).toString()
                 );
                 String hotelName = table.getValueAt(selectedRow, 1).toString();
 
+                // Open the transactional data entry window for the selected hotel
                 new US6.TransactionEntryWindow(hotelID, hotelName).setVisible(true);
             } else {
+                // No row selected — prompt the user to select a hotel before proceeding
                 JOptionPane.showMessageDialog(this, "Please select a hotel first.");
             }
         });

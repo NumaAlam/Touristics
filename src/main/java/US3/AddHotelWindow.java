@@ -6,9 +6,26 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+/**
+ * Swing window for adding new hotel master data records (User Story US3).
+ * Provides input fields for all 10 hotel attributes (category, name, owner,
+ * contact, address, city, citycode, phone, noRooms, noBeds) and persists
+ * validated input into the hotels table via JDBC.
+ *
+ * Validation is delegated to HotelValidator. On successful save, the user
+ * receives a confirmation pop-up and the window closes automatically.
+ *
+ * @author Deniz Kuskan
+ * @since Sprint 1
+ */
 public class AddHotelWindow extends JFrame {
 
+    /**
+     * Constructs and displays the Add Hotel window.
+     * Builds the form layout with 10 labelled input fields and a save button.
+     * The save action validates input, performs an INSERT into the hotels table,
+     * and closes the window on success.
+     */
     public AddHotelWindow() {
 
         setTitle("Add Hotel");
@@ -55,13 +72,14 @@ public class AddHotelWindow extends JFrame {
         panel.add(noBedField);
 
         add(panel, BorderLayout.CENTER);
-
         //Save Button
        JButton saveButton = new JButton("Save");
        add(saveButton, BorderLayout.SOUTH);
 
+        // Save handler: validates all fields, rejects blank or non-positive numeric input,
+        // then performs an INSERT into the hotels table via PreparedStatement.
+        // Errors are surfaced to the user through JOptionPane dialogs
        saveButton.addActionListener(e -> {
-
 
            String category = categoryField.getText();
            String name = nameField.getText();

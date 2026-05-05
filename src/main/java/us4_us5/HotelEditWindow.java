@@ -1,8 +1,8 @@
 package us4_us5;
 
-import javax.swing.*;
-import java.awt.*;
-import java.sql.*;
+import javax.swing.*; // Swing components used for the graphical user interface, such as JFrame, JTextField, JButton, JPanel and JOptionPane.
+import java.awt.*; // AWT layout classes, especially BorderLayout and GridLayout, used to arrange the edit form.
+import java.sql.*; // SQL classes used for database connection, PreparedStatement, ResultSet and SQL exception handling.
 
 
 public class HotelEditWindow extends JFrame {

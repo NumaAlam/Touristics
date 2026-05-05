@@ -1,11 +1,11 @@
 package us4_us5;
 
-import MyApp.Menu;
+import MyApp.Menu; // Needed to return from the hotel overview window back to the main menu.
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
+import javax.swing.*; // Swing components used for the graphical user interface, such as JFrame, JTable, JButton, JPanel and JOptionPane.
+import javax.swing.table.DefaultTableModel; // Table model used to define columns and add rows to the JTable.
+import java.awt.*; // AWT layout classes, especially BorderLayout, used to arrange GUI components inside the window.
+import java.sql.*; // SQL classes used for database connection, SQL statements, result sets and SQL exception handling.
 
 public class HotelOverviewWindow extends JFrame {
     private JTable table; // JTable is the visible table component shown to the user.

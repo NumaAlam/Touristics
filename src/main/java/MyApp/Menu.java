@@ -1,5 +1,7 @@
 package MyApp;
 
+import userWindows.SeniorWindow;
+
 import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Path;

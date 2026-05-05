@@ -1,4 +1,4 @@
-package MyApp;
+package userWindows;
 
 import javax.swing.*;
 

@@ -38,7 +38,7 @@ public class AddHotelWindow extends JFrame {
         JPanel panel = new JPanel(new GridLayout(11, 2, 10, 10));
 
 
-        JTextField categoryField = new JTextField();
+        JComboBox<String> categoryField = new JComboBox<>(new String[]{"*****", "****", "***", "**", "*"});
         JTextField nameField = new JTextField();
         JTextField ownerField = new JTextField();
         JTextField contactField = new JTextField();
@@ -81,7 +81,7 @@ public class AddHotelWindow extends JFrame {
         // Errors are surfaced to the user through JOptionPane dialogs
        saveButton.addActionListener(e -> {
 
-           String category = categoryField.getText();
+           String category = (String) categoryField.getSelectedItem();
            String name = nameField.getText();
            String owner = ownerField.getText();
            String contact = contactField.getText();

@@ -6,6 +6,10 @@ import java.awt.*;
 import java.sql.*;
 import java.time.Year;
 
+/**
+ * US10 – Shows all transactional data for a selected hotel with optional
+ * date range filtering, so senior users can verify data correctness.
+ */
 public class TransactionListWindow extends JFrame {
 
     private JTable table;
@@ -16,6 +20,7 @@ public class TransactionListWindow extends JFrame {
     private JComboBox<String> toYearComboBox;
     private JComboBox<String> toMonthComboBox;
 
+    // Keeps hotel DB IDs in sync with the dropdown index so we can query by ID
     private final java.util.ArrayList<Integer> hotelIDs = new java.util.ArrayList<>();
 
     private static final String DB_URL = "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;";
@@ -51,7 +56,7 @@ public class TransactionListWindow extends JFrame {
         model.addColumn("Beds");
         model.addColumn("Used Beds");
 
-        // --- Hotel dropdown ---
+        // Load all hotels from DB into dropdown; IDs are stored in parallel so we can map selection to DB ID
         hotelComboBox = new JComboBox<>();
         hotelIDs.clear();
 
@@ -142,7 +147,7 @@ public class TransactionListWindow extends JFrame {
     }
 
     private void addActions() {
-        // Load data when hotel selection changes
+        // Every dropdown triggers a refresh so the table always reflects the current filter selection
         hotelComboBox.addActionListener(e -> refreshTable());
         fromYearComboBox.addActionListener(e -> refreshTable());
         fromMonthComboBox.addActionListener(e -> refreshTable());
@@ -175,7 +180,7 @@ public class TransactionListWindow extends JFrame {
         int toMonth = toMonthComboBox.getSelectedIndex(); // 0 = All, 1 = Jan, ...
 
 
-
+        // Validate that FROM date is not after TO date to prevent empty or misleading results
         if (fromYear != 0 && toYear != 0) {
             if (fromYear > toYear || (fromYear == toYear && fromMonth > toMonth && toMonth != 0)) {
                 JOptionPane.showMessageDialog(this,
@@ -191,7 +196,7 @@ public class TransactionListWindow extends JFrame {
 
 
 
-
+    // Builds SQL dynamically based on active filters; uses PreparedStatement to prevent SQL injection
     private void fillTable(int hotelId, int fromYear, int fromMonth, int toYear, int toMonth) {
         model.setRowCount(0);
 
@@ -202,7 +207,7 @@ public class TransactionListWindow extends JFrame {
                             "FROM occupancies o " +
                             "WHERE o.id = ?");
 
-            // FROM filter
+            // FROM filter: (year > X OR (year = X AND month >= Y)) handles cross-year ranges correctly
             if (fromYear != 0 && fromMonth != 0) {
                 sql.append(" AND (o.year > ? OR (o.year = ? AND o.month >= ?))");
             } else if (fromYear != 0) {
@@ -268,6 +273,7 @@ public class TransactionListWindow extends JFrame {
         }
     }
 
+    // Converts month number (1-12) to name for readable table display
     private String getMonthName(int month) {
         String[] months = {"", "January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"};

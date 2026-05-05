@@ -7,7 +7,9 @@ import java.sql.*;
 
 public class HotelEditWindow extends JFrame {
 
-    private int hotelId;
+    private int hotelId; // Stores ID of the hotel selected in HotelOverviewWindow.
+
+    // Text fields for all hotel master data fields.
     private JTextField idField;
     private JTextField categoryField;
     private JTextField nameField;
@@ -21,24 +23,25 @@ public class HotelEditWindow extends JFrame {
     private JTextField noBedsField;
 
     public HotelEditWindow(int hotelId) {
-        this.hotelId = hotelId;
+        this.hotelId = hotelId; // Saves selected hotel ID for loading and updating the correct database record.
 
-        defineFrame();
-        initFields();
-        addComponents();
-        loadHotelData();
-        addButtonPanel();
+        defineFrame(); // Defines the basic frame settings.
+        initFields(); // Creates all text fields.
+        addComponents(); // Adds labels and text fields to the form.
+        loadHotelData(); // Loads the selected hotel data from the database.
+        addButtonPanel(); // Adds Save and Close buttons.
     }
 
     private void defineFrame() {
-        setTitle("Edit Hotel");
-        setSize(500, 500);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        setTitle("Edit Hotel"); // Sets title of the edit window.
+        setSize(500, 500); // Sets window size for the full master data form.
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Only closes this edit window, not the whole application.
+        setLocationRelativeTo(null); // Centers the window on the screen.
+        setLayout(new BorderLayout()); // Uses BorderLayout to place the form in the center and buttons at the bottom.
     }
 
     private void initFields() {
+        // Creates text fields for all master data fields of the hotel.
         idField = new JTextField();
         categoryField = new JTextField();
         nameField = new JTextField();
@@ -51,12 +54,15 @@ public class HotelEditWindow extends JFrame {
         noRoomsField = new JTextField();
         noBedsField = new JTextField();
 
-        idField.setEditable(false);
+        idField.setEditable(false); // The hotel ID is automatically assigned and must not be edited by the user.
     }
 
     private void addComponents() {
+        // Creates a form layout with 11 rows and 2 columns:
+        // one label and one text field per hotel master data field.
         JPanel formPanel = new JPanel(new GridLayout(11, 2, 5, 5));
 
+        // Adds all labels and their matching text fields to the form.
         formPanel.add(new JLabel("ID:"));
         formPanel.add(idField);
 
@@ -90,12 +96,15 @@ public class HotelEditWindow extends JFrame {
         formPanel.add(new JLabel("Number of Beds:"));
         formPanel.add(noBedsField);
 
+        // Adds padding around the form so the fields do not touch the window border.
         formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Adds the form to the center of the window.
         add(formPanel, BorderLayout.CENTER);
     }
 
     private void loadHotelData() {
+        // SQL query for loading the complete master data record of one selected hotel.
         String sql = """
             SELECT
                 id,
@@ -112,17 +121,19 @@ public class HotelEditWindow extends JFrame {
             FROM dbo.hotels
             WHERE id = ?;
             """;
-
+        // Uses PreparedStatement because the hotel ID is passed as a parameter.
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
                 "dev",
                 "dev");
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+            // Sets the selected hotel ID as the parameter for the WHERE clause.
             stmt.setInt(1, hotelId);
 
+            // Executes the query and reads the result.
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
+                    // Fills the form fields with the hotel data from the database.
                     idField.setText(String.valueOf(rs.getInt("id")));
                     categoryField.setText(rs.getString("category"));
                     nameField.setText(rs.getString("name"));
@@ -135,6 +146,7 @@ public class HotelEditWindow extends JFrame {
                     noRoomsField.setText(String.valueOf(rs.getInt("noRooms")));
                     noBedsField.setText(String.valueOf(rs.getInt("noBeds")));
                 } else {
+                    // Shows a warning if no hotel exists for the selected ID.
                     JOptionPane.showMessageDialog(
                             this,
                             "No hotel found for ID: " + hotelId,
@@ -145,6 +157,7 @@ public class HotelEditWindow extends JFrame {
             }
 
         } catch (SQLException e) {
+            // Shows an error dialog if loading the hotel data fails.
             JOptionPane.showMessageDialog(
                     this,
                     "Database error: " + e.getMessage(),
@@ -155,21 +168,25 @@ public class HotelEditWindow extends JFrame {
     }
 
     private void addButtonPanel() {
-        JPanel buttonPanel = new JPanel();
 
-        JButton saveButton = new JButton("Save changes");
-        JButton closeButton = new JButton("Close");
+        JPanel buttonPanel = new JPanel(); // Panel used to place Save and Close buttons below the form.
+
+        JButton saveButton = new JButton("Save changes"); // Button for saving changes to the database.
+        JButton closeButton = new JButton("Close"); // Button for closing the edit window without saving.
 
         buttonPanel.add(saveButton);
         buttonPanel.add(closeButton);
 
+        // Places the button panel at the bottom of the window.
         add(buttonPanel, BorderLayout.SOUTH);
 
+        // Connects the buttons to their functions.
         addSaveButtonFunction(saveButton);
         addCloseButtonFunction(closeButton);
     }
 
     private void addCloseButtonFunction(JButton closeButton) {
+        // Closes only the edit window.
         closeButton.addActionListener(e -> {
             dispose();
         });
@@ -177,13 +194,14 @@ public class HotelEditWindow extends JFrame {
 
     private void addSaveButtonFunction(JButton saveButton) {
         saveButton.addActionListener(e -> {
+            // Makes it so changes are only saved after explicit confirmation.
             int answer = JOptionPane.showConfirmDialog(
                     this,
                     "Do you really want to save the changes?",
                     "Confirm changes",
                     JOptionPane.YES_NO_OPTION
             );
-
+            // Only save data if the user confirms the action.
             if (answer == JOptionPane.YES_OPTION) {
                 saveHotelData();
             }
@@ -194,6 +212,7 @@ public class HotelEditWindow extends JFrame {
         int noRooms;
         int noBeds;
 
+        // Validates that the room and bed fields contain valid integer values.
         try {
             noRooms = Integer.parseInt(noRoomsField.getText().trim());
             noBeds = Integer.parseInt(noBedsField.getText().trim());
@@ -207,6 +226,7 @@ public class HotelEditWindow extends JFrame {
             return;
         }
 
+        // Prevents impossible hotel capacity values.
         if (noRooms <= 0 || noBeds <= 0) {
             JOptionPane.showMessageDialog(
                     this,
@@ -217,6 +237,7 @@ public class HotelEditWindow extends JFrame {
             return;
         }
 
+        // Checks that all required text fields are filled in before saving.
         if (categoryField.getText().trim().isEmpty()
                 || nameField.getText().trim().isEmpty()
                 || ownerField.getText().trim().isEmpty()
@@ -235,6 +256,8 @@ public class HotelEditWindow extends JFrame {
             return;
         }
 
+        // SQL update statement for saving changes to the selected hotel master data record.
+        // The hotel ID is used in the WHERE clause so only one hotel is updated.
         String sql = """
             UPDATE dbo.hotels
             SET
@@ -257,6 +280,7 @@ public class HotelEditWindow extends JFrame {
                 "dev");
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Assigns all edited field values to the SQL placeholders.
             stmt.setString(1, categoryField.getText().trim());
             stmt.setString(2, nameField.getText().trim());
             stmt.setString(3, ownerField.getText().trim());
@@ -267,10 +291,14 @@ public class HotelEditWindow extends JFrame {
             stmt.setString(8, phoneField.getText().trim());
             stmt.setInt(9, noRooms);
             stmt.setInt(10, noBeds);
+
+            // Uses the original selected hotel ID to identify the correct database record.
             stmt.setInt(11, hotelId);
 
+            // Executes the update and returns the number of affected rows.
             int updatedRows = stmt.executeUpdate();
 
+            // A successful update should change exactly one hotel row.
             if (updatedRows == 1) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -288,6 +316,7 @@ public class HotelEditWindow extends JFrame {
             }
 
         } catch (SQLException e) {
+            // Shows an error dialog if saving the hotel data fails.
             JOptionPane.showMessageDialog(
                     this,
                     "Database error: " + e.getMessage(),

@@ -11,7 +11,7 @@ public class HotelEditWindow extends JFrame {
 
     // Text fields for all hotel master data fields.
     private JTextField idField;
-    private JTextField categoryField;
+    private JComboBox<String> categoryComboBox;
     private JTextField nameField;
     private JTextField ownerField;
     private JTextField contactField;
@@ -43,7 +43,7 @@ public class HotelEditWindow extends JFrame {
     private void initFields() {
         // Creates text fields for all master data fields of the hotel.
         idField = new JTextField();
-        categoryField = new JTextField();
+        categoryComboBox = new JComboBox<>(new String[]{"*****", "****", "***", "**", "*"});
         nameField = new JTextField();
         ownerField = new JTextField();
         contactField = new JTextField();
@@ -67,7 +67,7 @@ public class HotelEditWindow extends JFrame {
         formPanel.add(idField);
 
         formPanel.add(new JLabel("Category:"));
-        formPanel.add(categoryField);
+        formPanel.add(categoryComboBox);
 
         formPanel.add(new JLabel("Name:"));
         formPanel.add(nameField);
@@ -135,7 +135,7 @@ public class HotelEditWindow extends JFrame {
                 if (rs.next()) {
                     // Fills the form fields with the hotel data from the database.
                     idField.setText(String.valueOf(rs.getInt("id")));
-                    categoryField.setText(rs.getString("category"));
+                    categoryComboBox.setSelectedItem(rs.getString("category"));
                     nameField.setText(rs.getString("name"));
                     ownerField.setText(rs.getString("owner"));
                     contactField.setText(rs.getString("contact"));
@@ -238,8 +238,7 @@ public class HotelEditWindow extends JFrame {
         }
 
         // Checks that all required text fields are filled in before saving.
-        if (categoryField.getText().trim().isEmpty()
-                || nameField.getText().trim().isEmpty()
+        if (nameField.getText().trim().isEmpty()
                 || ownerField.getText().trim().isEmpty()
                 || contactField.getText().trim().isEmpty()
                 || addressField.getText().trim().isEmpty()
@@ -281,7 +280,7 @@ public class HotelEditWindow extends JFrame {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // Assigns all edited field values to the SQL placeholders.
-            stmt.setString(1, categoryField.getText().trim());
+            stmt.setString(1, categoryComboBox.getSelectedItem().toString());
             stmt.setString(2, nameField.getText().trim());
             stmt.setString(3, ownerField.getText().trim());
             stmt.setString(4, contactField.getText().trim());

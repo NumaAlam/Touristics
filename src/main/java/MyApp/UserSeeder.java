@@ -6,6 +6,13 @@ import javax.swing.*;
 import java.sql.*;
 
 public class UserSeeder {
+    /*
+     * ================================================
+     *   WARNING: DO NOT RUN THIS CLASS EVER AGAIN!
+     *   Database has already been seeded.
+     *   Running this will create duplicate users!
+     * ================================================
+     */
     public static void main(String[] args) {
         try {
             Connection dbsconnection = DriverManager.getConnection(

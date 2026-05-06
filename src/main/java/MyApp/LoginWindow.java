@@ -51,7 +51,7 @@ public class LoginWindow extends JFrame {
                     ps.setString(1,username);
                     ResultSet rs = ps.executeQuery();
                     if (!rs.next()) {
-                        JOptionPane.showMessageDialog(null, "User not found"); //if the user is not found, an error message is displayed
+                        JOptionPane.showMessageDialog(null, "Invalid Username or Password"); //if the user is not found, an error message is displayed
                     } else if (BCrypt.checkpw(password, rs.getString("password_hash"))) { //if the password is correct, the user is logged in
                         if (rs.getString("role").equals("Hotel Representative")) {
                             new HotelRepWindow(rs.getInt("hotelID")).setVisible(true);
@@ -67,7 +67,7 @@ public class LoginWindow extends JFrame {
                             dispose();
                         }
                     } else {
-                        JOptionPane.showMessageDialog(null, "Invalid password"); // if the password is incorrect, an error message is displayed
+                        JOptionPane.showMessageDialog(null, "Invalid Username or Password"); // if the password is incorrect, an error message is displayed
                     }
 
                 } catch (SQLException e2) { // e2 because we need e for the button error msg and e2 for the database error msg

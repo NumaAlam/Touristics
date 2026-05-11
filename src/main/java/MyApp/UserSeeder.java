@@ -6,6 +6,16 @@ import javax.swing.*;
 import java.sql.*;
 
 public class UserSeeder {
+
+    /*
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+    NICHT MEHR AUSFÜHREN!!!!!!!!!!!!!
+     */
     public static void main(String[] args) {
         try {
             Connection dbsconnection = DriverManager.getConnection(

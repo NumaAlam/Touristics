@@ -1,11 +1,11 @@
 package US3;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+
 /**
  * Swing window for adding new hotel master data records (User Story US3).
  * Provides input fields for all 10 hotel attributes (category, name, owner,
@@ -111,26 +111,38 @@ public class AddHotelWindow extends JFrame {
 
            try (Connection conn = DriverManager.getConnection(
                    "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                   "dev", "dev");
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+                   "dev",
+                   "dev");
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // RETURN_GENERATED_KEYS added because of the auto-generated ID we need to automatically insert into the users table
 
+                ps.setString(1, category);
+                ps.setString(2, name);
+                ps.setString(3, owner);
+                ps.setString(4, contact);
+                ps.setString(5,address );
+                ps.setString(6, city);
+                ps.setString(7, citycode);
+                ps.setString(8,phone );
+                ps.setInt(9, noRoomAsNumber);
+                ps.setInt(10, noBedAsNumber);
 
-               ps.setString(1, category);
-               ps.setString(2, name);
-               ps.setString(3, owner);
-               ps.setString(4, contact);
-               ps.setString(5,address );
-               ps.setString(6, city);
-               ps.setString(7, citycode);
-               ps.setString(8,phone );
-               ps.setInt(9, noRoomAsNumber);
-               ps.setInt(10, noBedAsNumber);
+                ps.executeUpdate();
 
+               ResultSet generatedKeys = ps.getGeneratedKeys(); // fetches the auto-generated ID and then inserts it into the users table
 
-               ps.executeUpdate();
+               int newHotelId = 0; // default value so it is callable after the if statement
+               if (generatedKeys.next()) {
+                   newHotelId = generatedKeys.getInt(1);
+                   PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO users (username, password_hash, hotelID, role) VALUES (?, ?, ?, ?);");
+                   insertStatement.setString(1, "User" + newHotelId);
+                   insertStatement.setString(2, BCrypt.hashpw("Password" + newHotelId, BCrypt.gensalt()));
+                   insertStatement.setInt(3, newHotelId);
+                   insertStatement.setString(4, "Hotel Representative");
+                   insertStatement.executeUpdate();
+               }
 
-               JOptionPane.showMessageDialog(null, "Hotel erfolgreich gespeichert!");
-               dispose();
+                JOptionPane.showMessageDialog(null, "Success!" + "\n" + "Your Username is: " + "User" + newHotelId + "\n" + "Your Password is: " + " Password" + newHotelId); //Gives the user a success message
+                dispose();
 
            } catch (SQLException ex) {
                JOptionPane.showMessageDialog(null, "Datenbank-Fehler: " + ex.getMessage());

@@ -1,5 +1,8 @@
-package MyApp;
+package userWindows;
 
+
+import MyApp.LoginWindow;
+import MyApp.Menu;
 
 import javax.swing.*;
 import java.awt.*;

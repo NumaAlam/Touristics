@@ -11,23 +11,23 @@
         </property>
 
         <property name="hibernate.connection.url">
-            jdbc:sqlserver://185.119.119.126:1433;databaseName=SP_DEUTSCH;encrypt=true;trustServerCertificate=true
+            jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true
         </property>
 
-        <property name="hibernate.connection.username">johndoe</property>
-        <property name="hibernate.connection.password">johndoe</property>
+        <property name="hibernate.connection.username">dev</property>
+        <property name="hibernate.connection.password">dev</property>
 
         <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
 
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
-        <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.hbm2ddl.auto">validate</property>
 
         <property name="hibernate.current_session_context_class">thread</property>
 
         <!-- Entity Mapping -->
         <!-- <mapping class="com.example.model.Person"/> -->
-        <mapping class="unit07.db.crud.intro.Person"/>
+        <mapping class="hotels.Hotel"/>
 
     </session-factory>
 </hibernate-configuration>

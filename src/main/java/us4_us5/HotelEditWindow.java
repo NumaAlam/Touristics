@@ -1,5 +1,10 @@
 package us4_us5;
 
+import database.HibernateUtil;
+import hotels.Hotel;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import javax.swing.*; // Swing components used for the graphical user interface, such as JFrame, JTextField, JButton, JPanel and JOptionPane.
 import java.awt.*; // AWT layout classes, especially BorderLayout and GridLayout, used to arrange the edit form.
 import java.sql.*; // SQL classes used for database connection, PreparedStatement, ResultSet and SQL exception handling.
@@ -104,63 +109,35 @@ public class HotelEditWindow extends JFrame {
     }
 
     private void loadHotelData() {
-        // SQL query for loading the complete master data record of one selected hotel.
-        String sql = """
-            SELECT
-                id,
-                category,
-                name,
-                owner,
-                contact,
-                address,
-                city,
-                cityCode,
-                phone,
-                noRooms,
-                noBeds
-            FROM dbo.hotels
-            WHERE id = ?;
-            """;
-        // Uses PreparedStatement because the hotel ID is passed as a parameter.
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                "dev",
-                "dev");
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Sets the selected hotel ID as the parameter for the WHERE clause.
-            stmt.setInt(1, hotelId);
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
-            // Executes the query and reads the result.
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    // Fills the form fields with the hotel data from the database.
-                    idField.setText(String.valueOf(rs.getInt("id")));
-                    categoryComboBox.setSelectedItem(rs.getString("category"));
-                    nameField.setText(rs.getString("name"));
-                    ownerField.setText(rs.getString("owner"));
-                    contactField.setText(rs.getString("contact"));
-                    addressField.setText(rs.getString("address"));
-                    cityField.setText(rs.getString("city"));
-                    cityCodeField.setText(rs.getString("cityCode"));
-                    phoneField.setText(rs.getString("phone"));
-                    noRoomsField.setText(String.valueOf(rs.getInt("noRooms")));
-                    noBedsField.setText(String.valueOf(rs.getInt("noBeds")));
-                } else {
-                    // Shows a warning if no hotel exists for the selected ID.
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "No hotel found for ID: " + hotelId,
-                            "Hotel not found",
-                            JOptionPane.WARNING_MESSAGE
-                    );
-                }
+            Hotel hotel = session.get(Hotel.class, hotelId);
+
+            if (hotel != null) {
+                idField.setText(String.valueOf(hotel.getId()));
+                categoryComboBox.setSelectedItem(hotel.getCategory());
+                nameField.setText(hotel.getName());
+                ownerField.setText(hotel.getOwner());
+                contactField.setText(hotel.getContact());
+                addressField.setText(hotel.getAddress());
+                cityField.setText(hotel.getCity());
+                cityCodeField.setText(hotel.getCityCode());
+                phoneField.setText(hotel.getPhone());
+                noRoomsField.setText(String.valueOf(hotel.getNoRooms()));
+                noBedsField.setText(String.valueOf(hotel.getNoBeds()));
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No hotel found for ID: " + hotelId,
+                        "Hotel not found",
+                        JOptionPane.WARNING_MESSAGE
+                );
             }
 
-        } catch (SQLException e) {
-            // Shows an error dialog if loading the hotel data fails.
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Database error: " + e.getMessage(),
+                    "Hibernate error while loading hotel data: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -257,68 +234,46 @@ public class HotelEditWindow extends JFrame {
 
         // SQL update statement for saving changes to the selected hotel master data record.
         // The hotel ID is used in the WHERE clause so only one hotel is updated.
-        String sql = """
-            UPDATE dbo.hotels
-            SET
-                category = ?,
-                name = ?,
-                owner = ?,
-                contact = ?,
-                address = ?,
-                city = ?,
-                cityCode = ?,
-                phone = ?,
-                noRooms = ?,
-                noBeds = ?
-            WHERE id = ?;
-            """;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                "dev",
-                "dev");
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Hotel hotel = session.get(Hotel.class, hotelId);
 
-            // Assigns all edited field values to the SQL placeholders.
-            stmt.setString(1, categoryComboBox.getSelectedItem().toString());
-            stmt.setString(2, nameField.getText().trim());
-            stmt.setString(3, ownerField.getText().trim());
-            stmt.setString(4, contactField.getText().trim());
-            stmt.setString(5, addressField.getText().trim());
-            stmt.setString(6, cityField.getText().trim());
-            stmt.setString(7, cityCodeField.getText().trim());
-            stmt.setString(8, phoneField.getText().trim());
-            stmt.setInt(9, noRooms);
-            stmt.setInt(10, noBeds);
-
-            // Uses the original selected hotel ID to identify the correct database record.
-            stmt.setInt(11, hotelId);
-
-            // Executes the update and returns the number of affected rows.
-            int updatedRows = stmt.executeUpdate();
-
-            // A successful update should change exactly one hotel row.
-            if (updatedRows == 1) {
+            if (hotel == null) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Hotel data saved successfully.",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "No hotel data was updated.",
-                        "Update failed",
+                        "No hotel found for ID: " + hotelId,
+                        "Hotel not found",
                         JOptionPane.WARNING_MESSAGE
                 );
+                transaction.rollback();
+                return;
             }
 
-        } catch (SQLException e) {
-            // Shows an error dialog if saving the hotel data fails.
+            hotel.setCategory(categoryComboBox.getSelectedItem().toString());
+            hotel.setName(nameField.getText().trim());
+            hotel.setOwner(ownerField.getText().trim());
+            hotel.setContact(contactField.getText().trim());
+            hotel.setAddress(addressField.getText().trim());
+            hotel.setCity(cityField.getText().trim());
+            hotel.setCityCode(cityCodeField.getText().trim());
+            hotel.setPhone(phoneField.getText().trim());
+            hotel.setNoRooms(noRooms);
+            hotel.setNoBeds(noBeds);
+
+            transaction.commit();
+
             JOptionPane.showMessageDialog(
                     this,
-                    "Database error: " + e.getMessage(),
+                    "Hotel data saved successfully.",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Hibernate error while saving hotel data: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );

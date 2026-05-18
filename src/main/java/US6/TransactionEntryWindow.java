@@ -27,7 +27,7 @@ public class TransactionEntryWindow extends JFrame {
     private JTextField idField;        // Hotel ID — read-only, set from constructor
     private JTextField nameField;      // Hotel name — read-only, set from constructor
     private JTextField yearField;      // Year of the occupancy entry — user input
-    private JTextField monthField;     // Month of the occupancy entry (1–12) — user input
+    private JComboBox<String> monthField;     // Month of the occupancy entry (1–12) — user input
     private JTextField roomsField;     // Total number of rooms — auto-loaded from DB, read-only
     private JTextField bedsField;      // Total number of beds — auto-loaded from DB, read-only
     private JTextField roomOccField;   // Number of rooms occupied — user input
@@ -75,7 +75,11 @@ public class TransactionEntryWindow extends JFrame {
         idField      = new JTextField(String.valueOf(hotelID));
         nameField    = new JTextField(hotelName);
         yearField    = new JTextField();
-        monthField   = new JTextField();
+        monthField = new JComboBox<>(new String[]{
+                "January", "February", "March", "April",
+                "May", "June", "July", "August",
+                "September", "October", "November", "December"
+        });
         roomsField   = new JTextField();
         bedsField    = new JTextField();
         roomOccField = new JTextField();
@@ -190,7 +194,7 @@ public class TransactionEntryWindow extends JFrame {
 
         // Read and trim all field values
         String yearText    = yearField.getText().trim();
-        String monthText   = monthField.getText().trim();
+        String monthText = (String) monthField.getSelectedItem();
         String roomsText   = roomsField.getText().trim();
         String bedsText    = bedsField.getText().trim();
         String roomOccText = roomOccField.getText().trim();
@@ -212,7 +216,7 @@ public class TransactionEntryWindow extends JFrame {
         int year, month, rooms, beds, usedRooms, usedBeds;
         try {
             year      = Integer.parseInt(yearText);
-            month     = Integer.parseInt(monthText);
+            month = monthField.getSelectedIndex() + 1;
             rooms     = Integer.parseInt(roomsText);
             beds      = Integer.parseInt(bedsText);
             usedRooms = Integer.parseInt(roomOccText);

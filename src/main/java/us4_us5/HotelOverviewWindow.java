@@ -111,6 +111,12 @@ public class HotelOverviewWindow extends JFrame {
                 }
     }
 
+    // Refresh Button
+    private void refreshTable() {
+        model.setRowCount(0); // löscht alle aktuellen Zeilen
+        fillTable();          // lädt Daten neu aus der Datenbank
+    }
+
     private void addComponents() {
         JScrollPane scrollPane = new JScrollPane(table); // Wraps the table inside a scroll pane so the user can scroll through all hotels.
         add(scrollPane, BorderLayout.CENTER);  // Adds the scrollable table to the center of the frame.
@@ -137,6 +143,11 @@ public class HotelOverviewWindow extends JFrame {
         addBackButtonFunction(backButton);
         //US6
         addTransactionButtonFunction(transactionButton);
+
+        //Refresh button
+        JButton refreshButton = new JButton("Refresh");
+        buttonPanel.add(refreshButton);
+        addRefreshButtonFunction(refreshButton);
 
 
     }
@@ -202,6 +213,11 @@ public class HotelOverviewWindow extends JFrame {
                 JOptionPane.showMessageDialog(this, "Please select a hotel first.");
             }
         });
+    }
+
+    // refresh button
+    private void addRefreshButtonFunction(JButton refreshButton) {
+        refreshButton.addActionListener(e -> refreshTable());
     }
 
 }

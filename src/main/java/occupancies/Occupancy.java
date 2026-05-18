@@ -1,18 +1,40 @@
 package occupancies;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Table(name = "occupancies")
+@IdClass(OccupancyPK.class)
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-
 public class Occupancy {
 
-    private final int id;
-    private final int rooms;
-    private final int usedRooms;
-    private final int beds;
-    private final int usedBeds;
-    private final int year;
-    private final int month;
+    @Id
+    @Column(name = "id")
+    private int id;
+
+    @Id
+    @Column(name = "year")
+    private int year;
+
+    @Id
+    @Column(name = "month")
+    private int month;
+
+    @Column(name = "rooms")
+    private int rooms;
+
+    @Column(name = "usedRooms")
+    private int usedRooms;
+
+    @Column(name = "beds")
+    private int beds;
+
+    @Column(name = "usedBeds")
+    private int usedBeds;
+
 }

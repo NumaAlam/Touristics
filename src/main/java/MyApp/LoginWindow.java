@@ -1,10 +1,14 @@
 package MyApp;
 
+import database.HibernateUtil;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.mindrot.jbcrypt.BCrypt;
 import userWindows.HeadWindow;
 import userWindows.HotelRepWindow;
 import userWindows.SeniorAdminWindow;
 import userWindows.SeniorWindow;
+import users.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,23 +47,21 @@ public class LoginWindow extends JFrame {
                     return;
                 }
 
-                try (Connection conn = DriverManager.getConnection(
-                        "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                        "dev",
-                        "dev")) {
-                    PreparedStatement ps = conn.prepareStatement("SELECT password_hash, hotelID, role FROM users WHERE username = ?"); // Selects the password hash, hotelID, and role from the users table where the username matches the input
-                    ps.setString(1,username);
-                    ResultSet rs = ps.executeQuery();
-                    if (!rs.next()) {
-                        JOptionPane.showMessageDialog(null, "User not found"); //if the user is not found, an error message is displayed
-                    } else if (BCrypt.checkpw(password, rs.getString("password_hash"))) { //if the password is correct, the user is logged in
-                        if (rs.getString("role").equals("Hotel Representative")) {
-                            new HotelRepWindow(rs.getInt("hotelID")).setVisible(true);
+                try (Session session = HibernateUtil.getSessionFactory().openSession();) {
+                    User user = session
+                            .createQuery("from User where username = :username", User.class)
+                            .setParameter("username", username)
+                            .uniqueResult();
+                    if (user == null) {
+                        JOptionPane.showMessageDialog(null, "User or password invalid"); //if the user is not found, an error message is displayed
+                    } else if (BCrypt.checkpw(password, user.getPasswordHash())) { //if the password is correct, the user is logged in
+                        if (user.getRole().equals("Hotel Representative")) {
+                            new HotelRepWindow(user.getHotelID()).setVisible(true);
                             dispose();
-                        } else if (rs.getString("role").equals("Senior")) {
+                        } else if (user.getRole().equals("Senior")) {
                             new SeniorWindow("Welcome Senior").setVisible(true);
                             dispose();
-                        } else if (rs.getString("role").equals("Senior_Admin")) {
+                        } else if (user.getRole().equals("Senior_Admin")) {
                             new SeniorAdminWindow().setVisible(true);
                             dispose();
                         } else {
@@ -67,11 +69,11 @@ public class LoginWindow extends JFrame {
                             dispose();
                         }
                     } else {
-                        JOptionPane.showMessageDialog(null, "Invalid password"); // if the password is incorrect, an error message is displayed
+                        JOptionPane.showMessageDialog(null, "User or password invalid"); // if the password is incorrect, an error message is displayed
                     }
 
-                } catch (SQLException e2) { // e2 because we need e for the button error msg and e2 for the database error msg
-                    System.err.println("Database error: " + e2.getMessage());
+                } catch (HibernateException ex) {
+                    System.err.println("Database error: " + ex.getMessage());
                 }
 
 

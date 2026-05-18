@@ -28,6 +28,8 @@
         <!-- Entity Mapping -->
         <!-- <mapping class="com.example.model.Person"/> -->
         <mapping class="hotels.Hotel"/>
+        <mapping class="occupancies.Occupancy"/>
+        <mapping class="users.User"/>
 
     </session-factory>
 </hibernate-configuration>

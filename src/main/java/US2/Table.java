@@ -9,9 +9,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class Table extends JFrame {
 
@@ -255,7 +258,11 @@ public class Table extends JFrame {
             while (rs.next()) {
                 String[] row = new String[8];
                 for (int i = 1; i <= 8; i++) {
-                    row[i - 1] = rs.getString(i);
+                    if (i == 4) {
+                        row[i-1] = Month.of(rs.getInt("month")).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                    } else {
+                        row[i - 1] = rs.getString(i);
+                    }
                 }
                 model.addRow(row);
             }

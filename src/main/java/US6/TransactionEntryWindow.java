@@ -194,14 +194,13 @@ public class TransactionEntryWindow extends JFrame {
 
         // Read and trim all field values
         String yearText    = yearField.getText().trim();
-        String monthText = (String) monthField.getSelectedItem();
         String roomsText   = roomsField.getText().trim();
         String bedsText    = bedsField.getText().trim();
         String roomOccText = roomOccField.getText().trim();
         String bedOccText  = bedOccField.getText().trim();
 
         // Step 1: Check that no required field is empty
-        if (yearText.isBlank() || monthText.isBlank() || roomsText.isBlank()
+        if (yearText.isBlank() || roomsText.isBlank()
                 || bedsText.isBlank() || roomOccText.isBlank() || bedOccText.isBlank()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -238,14 +237,8 @@ public class TransactionEntryWindow extends JFrame {
             return;
         }
 
-        // Step 4: Month must be a valid calendar month (1–12)
-        if (month < 1 || month > 12) {
-            JOptionPane.showMessageDialog(
-                    this, "Month must be between 1 and 12.", "Invalid input", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
 
-        // Step 5: Room and bed capacity must be positive (should always be, since loaded from DB)
+        // Step 4: Room and bed capacity must be positive (should always be, since loaded from DB)
         if (rooms <= 0 || beds <= 0) {
             JOptionPane.showMessageDialog(
                     this, "Number of rooms and number of beds must be greater than 0.",
@@ -253,7 +246,7 @@ public class TransactionEntryWindow extends JFrame {
             return;
         }
 
-        // Step 6: Occupancy values cannot be negative
+        // Step 5: Occupancy values cannot be negative
         if (usedRooms < 0 || usedBeds < 0) {
             JOptionPane.showMessageDialog(
                     this, "Room occupancy and bed occupancy cannot be negative.",
@@ -261,7 +254,7 @@ public class TransactionEntryWindow extends JFrame {
             return;
         }
 
-        // Step 7a: Room occupancy cannot exceed total room capacity
+        // Step 6a: Room occupancy cannot exceed total room capacity
         if (usedRooms > rooms) {
             JOptionPane.showMessageDialog(
                     this, "Room occupancy cannot be higher than number of rooms.",
@@ -269,7 +262,7 @@ public class TransactionEntryWindow extends JFrame {
             return;
         }
 
-        // Step 7b: Bed occupancy cannot exceed total bed capacity
+        // Step 6b: Bed occupancy cannot exceed total bed capacity
         if (usedBeds > beds) {
             JOptionPane.showMessageDialog(
                     this, "Bed occupancy cannot be higher than number of beds.",
@@ -277,7 +270,7 @@ public class TransactionEntryWindow extends JFrame {
             return;
         }
 
-        // Step 8: Check for duplicate — same hotel, year and month must not already exist in DB
+        // Step 7: Check for duplicate — same hotel, year and month must not already exist in DB
         if (transactionAlreadyExists(year, month)) {
             JOptionPane.showMessageDialog(
                     this,

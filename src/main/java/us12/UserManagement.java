@@ -1,0 +1,228 @@
+package us12;
+import database.HibernateUtil;
+import org.hibernate.SessionFactory;
+import users.User;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.mindrot.jbcrypt.BCrypt;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+public class UserManagement extends JFrame {
+
+    private JTable table;
+    private DefaultTableModel model;
+    public UserManagement() {
+        defineFrame();
+        initComponents();
+        fillTable();
+        addComponents();
+        addButtonPanel();
+    }
+
+    private void defineFrame (){
+         setTitle("Hotel Management System");
+         setSize(600,400);
+         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+         setLocationRelativeTo(null);
+         setLayout(new BorderLayout());
+    }
+
+    private void initComponents(){
+        model = new DefaultTableModel();
+        table = new JTable(model);
+        table.setDefaultEditor(Object.class, null);
+        model.addColumn("ID");
+        model.addColumn("Username");
+        model.addColumn("Role");
+        model.addColumn("Hotel ID");
+        model.addColumn("Can Delete");
+
+    }
+    private void fillTable() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            List<User> users = session.createQuery("from User", User.class).list();
+            for (User u : users) {
+                boolean canDel = Boolean.TRUE.equals(u.getCanDelete()) || u.getRole().equals("Senior");
+                model.addRow(new Object[]{
+                        u.getId(),
+                        u.getUsername(),
+                        u.getRole(),
+                        u.getHotelID() != null ? u.getHotelID() : "-",
+                        canDel ? "Yes" : "No"
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Database error: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void refreshTable() {
+        model.setRowCount(0);
+        fillTable();
+    }
+
+    private void addComponents() {
+        JScrollPane scrollPane = new JScrollPane(table);
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void addButtonPanel() {
+        JPanel buttonPanel = new JPanel();
+
+        JButton addButton = new JButton("Add User");
+        JButton editButton = new JButton("Edit selected User");
+        JButton deleteButton = new JButton("Delete selected User");
+        JButton refreshButton = new JButton("Refresh");
+        JButton backButton = new JButton("Back to Menu");
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(backButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        addAddButtonFunction(addButton);
+        addEditButtonFunction(editButton);
+        addDeleteButtonFunction(deleteButton);
+        refreshButton.addActionListener(e -> refreshTable());
+        backButton.addActionListener(e -> dispose());
+    }
+
+    // ── ADD ──────────────────────────────────────────────────────────────────
+
+    private void addAddButtonFunction(JButton addButton) {
+        addButton.addActionListener(e -> {
+            // Collect input via dialogs
+            String username = JOptionPane.showInputDialog(this, "Username:");
+            if (username == null || username.isBlank()) return;
+
+            String password = JOptionPane.showInputDialog(this, "Password:");
+            if (password == null || password.isBlank()) return;
+
+            String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
+            String role = (String) JOptionPane.showInputDialog(this,
+                    "Select Role:", "Role",
+                    JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
+            if (role == null) return;
+
+            Transaction tx = null;
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                tx = session.beginTransaction();
+
+                User user = new User();
+                user.setUsername(username);
+                user.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
+                user.setRole(role);
+                user.setHotelID(null); // Admin-type users have no hotel
+
+                session.persist(user);
+                tx.commit();
+
+                JOptionPane.showMessageDialog(this, "User \"" + username + "\" added successfully.");
+                refreshTable();
+            } catch (Exception ex) {
+                if (tx != null) tx.rollback();
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+    }
+
+    // ── EDIT ─────────────────────────────────────────────────────────────────
+
+    private void addEditButtonFunction(JButton editButton) {
+        editButton.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a user first.",
+                        "No user selected", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int userId = (int) model.getValueAt(selectedRow, 0);
+            String currentRole = (String) model.getValueAt(selectedRow, 2);
+
+            // Allow changing the role
+            String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
+            String newRole = (String) JOptionPane.showInputDialog(this,
+                    "Select new Role:", "Edit Role",
+                    JOptionPane.PLAIN_MESSAGE, null, roles, currentRole);
+            if (newRole == null) return;
+
+            // Optionally reset password
+            int resetPw = JOptionPane.showConfirmDialog(this,
+                    "Reset password?", "Password", JOptionPane.YES_NO_OPTION);
+            int canDeleteOption = JOptionPane.showConfirmDialog(this,
+                    "Grant delete permission?", "Delete Permission", JOptionPane.YES_NO_OPTION);
+
+
+            Transaction tx = null;
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                tx = session.beginTransaction();
+
+                User user = session.get(User.class, userId);
+                user.setRole(newRole);
+                user.setCanDelete(canDeleteOption == JOptionPane.YES_OPTION);
+                session.merge(user);// ← hier
+                if (resetPw == JOptionPane.YES_OPTION) {
+                    String newPassword = JOptionPane.showInputDialog(this, "New Password:");
+                    if (newPassword != null && !newPassword.isBlank()) {
+                        user.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+                    }
+                }
+
+                tx.commit();
+                JOptionPane.showMessageDialog(this, "User updated successfully.");
+                refreshTable();
+            } catch (Exception ex) {
+                if (tx != null) tx.rollback();
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+    }
+
+    // ── DELETE ────────────────────────────────────────────────────────────────
+
+    private void addDeleteButtonFunction(JButton deleteButton) {
+        deleteButton.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a user first.",
+                        "No user selected", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int userId = (int) model.getValueAt(selectedRow, 0);
+            String username = (String) model.getValueAt(selectedRow, 1);
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Delete user \"" + username + "\"?",
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) return;
+
+            Transaction tx = null;
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                tx = session.beginTransaction();
+                User user = session.get(User.class, userId);
+                session.remove(user);
+                tx.commit();
+
+                JOptionPane.showMessageDialog(this, "User \"" + username + "\" deleted.");
+                refreshTable();
+            } catch (Exception ex) {
+                if (tx != null) tx.rollback();
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+    }
+
+}
+

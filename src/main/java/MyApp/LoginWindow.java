@@ -55,6 +55,9 @@ public class LoginWindow extends JFrame {
                     if (user == null) {
                         JOptionPane.showMessageDialog(null, "User or password invalid"); //if the user is not found, an error message is displayed
                     } else if (BCrypt.checkpw(password, user.getPasswordHash())) { //if the password is correct, the user is logged in
+                        MyApp.Session.currentRole = user.getRole();
+                        MyApp.Session.canDelete = Boolean.TRUE.equals(user.getCanDelete());
+
                         if (user.getRole().equals("Hotel Representative")) {
                             new HotelRepWindow(user.getHotelID()).setVisible(true);
                             dispose();

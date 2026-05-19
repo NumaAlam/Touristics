@@ -15,6 +15,7 @@ public class Menu extends JFrame {
     JMenuItem capacityMenuItem = new JMenuItem("Master Data Summary");
     JMenuItem occupancyMenuItem = new JMenuItem("Transactional Data");
     JMenuItem addHotelMenuItem = new JMenuItem("Add Hotel");
+    JMenuItem userManagementMenuItem = new JMenuItem("User Management");
 
     JMenuItem hotelOverviewMenuItem = new JMenuItem("Hotel Overview");
 
@@ -29,6 +30,7 @@ public class Menu extends JFrame {
         menu.add(hotelOverviewMenuItem);
         menu.add(transactionListMenuItem);
         menu.add(exitMenuItem);
+        menu.add(userManagementMenuItem);
 
         menuBar.add(menu);
         setJMenuBar(menuBar);
@@ -51,6 +53,10 @@ public class Menu extends JFrame {
 
         hotelOverviewMenuItem.addActionListener(e -> {
             new us4_us5.HotelOverviewWindow().setVisible(true);
+        });
+
+        userManagementMenuItem.addActionListener(e -> {
+            new us12.UserManagement().setVisible(true);
         });
 
         helpMenuItem.addActionListener(e -> {

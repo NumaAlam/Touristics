@@ -1,16 +1,22 @@
 package US3;
 
+import database.HibernateUtil;
+import hotels.Hotel;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.mindrot.jbcrypt.BCrypt;
+import users.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
+
+
 
 /**
  * Swing window for adding new hotel master data records (User Story US3).
  * Provides input fields for all 10 hotel attributes (category, name, owner,
  * contact, address, city, citycode, phone, noRooms, noBeds) and persists
- * validated input into the hotels table via JDBC.
+ * validated input into the hotels table via Hibernate.
  *
  * Validation is delegated to HotelValidator. On successful save, the user
  * receives a confirmation pop-up and the window closes automatically.
@@ -23,7 +29,7 @@ public class AddHotelWindow extends JFrame {
     /**
      * Constructs and displays the Add Hotel window.
      * Builds the form layout with 10 labelled input fields and a save button.
-     * The save action validates input, performs an INSERT into the hotels table,
+     * The save action validates input, persists the Hotel entity via Hibernate,
      * and closes the window on success.
      */
     public AddHotelWindow() {
@@ -106,47 +112,56 @@ public class AddHotelWindow extends JFrame {
            int noRoomAsNumber = Integer.parseInt(noRoom);
            int noBedAsNumber = Integer.parseInt(noBed);
 
-           String sql = "INSERT INTO hotels (category, name, owner, contact, address, city, cityCode, phone, noRooms, noBeds) "
-                   + "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+           // Build the Hotel entity
+           Hotel hotel = new Hotel();
+           hotel.setCategory(category);
+           hotel.setName(name);
+           hotel.setOwner(owner);
+           hotel.setContact(contact);
+           hotel.setAddress(address);
+           hotel.setCity(city);
+           hotel.setCityCode(citycode);
+           hotel.setPhone(phone);
+           hotel.setNoRooms(noRoomAsNumber);
+           hotel.setNoBeds(noBedAsNumber);
 
-           try (Connection conn = DriverManager.getConnection(
-                   "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                   "dev",
-                   "dev");
-                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // RETURN_GENERATED_KEYS added because of the auto-generated ID we need to automatically insert into the users table
+           Transaction tx = null;
+           try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
-                ps.setString(1, category);
-                ps.setString(2, name);
-                ps.setString(3, owner);
-                ps.setString(4, contact);
-                ps.setString(5,address );
-                ps.setString(6, city);
-                ps.setString(7, citycode);
-                ps.setString(8,phone );
-                ps.setInt(9, noRoomAsNumber);
-                ps.setInt(10, noBedAsNumber);
+               tx = session.beginTransaction();
 
-                ps.executeUpdate();
+               // Persist the hotel — Hibernate fills in the generated ID
+               session.persist(hotel);
+               session.flush(); // ensures hotel.getId() is populated before we use it
 
-               ResultSet generatedKeys = ps.getGeneratedKeys(); // fetches the auto-generated ID and then inserts it into the users table
 
-               int newHotelId = 0; // default value so it is callable after the if statement
-               if (generatedKeys.next()) {
-                   newHotelId = generatedKeys.getInt(1);
-                   PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO users (username, password_hash, hotelID, role) VALUES (?, ?, ?, ?);");
-                   insertStatement.setString(1, "User" + newHotelId);
-                   insertStatement.setString(2, BCrypt.hashpw("Password" + newHotelId, BCrypt.gensalt()));
-                   insertStatement.setInt(3, newHotelId);
-                   insertStatement.setString(4, "Hotel Representative");
-                   insertStatement.executeUpdate();
-               }
 
-                JOptionPane.showMessageDialog(null, "Success!" + "\n" + "Your Username is: " + "User" + newHotelId + "\n" + "Your Password is: " + " Password" + newHotelId); //Gives the user a success message
-                dispose();
+               // Create the corresponding user account
+               int newHotelId = hotel.getId();
+               String username = "User" + newHotelId;
+               String rawPassword = "Password" + newHotelId;
+               String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
 
-           } catch (SQLException ex) {
+               User user = new User();
+               user.setUsername(username);
+               user.setPasswordHash(hashedPassword);
+               user.setHotelID(newHotelId);
+               user.setRole("Hotel Representative");
+
+               session.persist(user);
+               tx.commit();
+
+               JOptionPane.showMessageDialog(null,
+                       "Success!" + "\n" +
+                               "Your Username is: " + username + "\n" +
+                               "Your Password is: " + rawPassword);
+               dispose();
+
+           } catch (Exception ex) {
+               if (tx != null) tx.rollback();
                JOptionPane.showMessageDialog(null, "Datenbank-Fehler: " + ex.getMessage());
            }
+
 
            System.out.println("Category: " + category);
            System.out.println("Name: " + name);

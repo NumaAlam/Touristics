@@ -150,10 +150,18 @@ public class HotelEditWindow extends JFrame {
 
         JButton saveButton = new JButton("Save changes"); // Button for saving changes to the database.
         JButton closeButton = new JButton("Close"); // Button for closing the edit window without saving.
-
+        JButton deleteButton = new JButton("Delete Hotel");
         buttonPanel.add(saveButton);
         buttonPanel.add(closeButton);
 
+        if (MyApp.Session.currentRole.equals("Senior")) {
+            buttonPanel.add(deleteButton);
+            addDeleteButtonFunction(deleteButton);
+        }
+        if (MyApp.Session.currentRole.equals("Senior") || Boolean.TRUE.equals(MyApp.Session.canDelete)) {
+            buttonPanel.add(deleteButton);
+            addDeleteButtonFunction(deleteButton);
+        }
         // Places the button panel at the bottom of the window.
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -181,6 +189,25 @@ public class HotelEditWindow extends JFrame {
             // Only save data if the user confirms the action.
             if (answer == JOptionPane.YES_OPTION) {
                 saveHotelData();
+            }
+        });
+    }private void addDeleteButtonFunction(JButton deleteButton) {
+        deleteButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Delete this hotel?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) return;
+
+            Transaction tx = null;
+            try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
+                tx = session.beginTransaction();
+                Hotel hotel = session.get(Hotel.class, hotelId);
+                session.remove(hotel);
+                tx.commit();
+                JOptionPane.showMessageDialog(this, "Hotel deleted successfully.");
+                dispose();
+            } catch (Exception ex) {
+                if (tx != null) tx.rollback();
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         });
     }

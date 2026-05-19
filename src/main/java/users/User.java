@@ -29,4 +29,7 @@ public class User {
 
     @Column(name = "role", nullable = false)
     private String role;
+
+    @Column(name = "canDelete")  // ← NEU
+    private Boolean canDelete;   // ← NEU
 }

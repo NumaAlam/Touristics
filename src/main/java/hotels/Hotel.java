@@ -53,4 +53,9 @@ public class Hotel {
                 address + "," + city + "," + cityCode + "," + phone + "," + noRooms + "," + noBeds;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

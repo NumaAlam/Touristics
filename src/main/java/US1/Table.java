@@ -1,13 +1,13 @@
 package US1;
 
-import MyApp.Menu;
+import database.HibernateUtil;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.*;
+import java.util.List;
 
 public class Table extends JFrame {
 
@@ -43,14 +43,10 @@ public class Table extends JFrame {
 
     // imports table data from DBS via sql
     private void fillTable() {
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                "dev",
-                "dev")) {
-            Statement stmt = conn.createStatement();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
             // Selects no of establishments, avg no of rooms and avg no of beds – grouped by category
-            ResultSet rs = stmt.executeQuery("SELECT \n" +
+            String sqlString = "SELECT \n" +
                     "    ISNULL(Combined, 'Total') AS Category,\n" +
                     "    COUNT(*) AS Establishments,\n" +
                     "    AVG(noRooms) AS AverageNoOfRooms,\n" +
@@ -66,25 +62,24 @@ public class Table extends JFrame {
                     "    FROM hotels\n" +
                     ") AS Sub\n" +
                     "GROUP BY ROLLUP(Combined)\n" +
-                    "ORDER BY GROUPING(Combined) ASC, Category DESC;");
+                    "ORDER BY GROUPING(Combined) ASC, Category DESC;";
+            List <Object[]> results = session
+                    .createNativeQuery(sqlString, Object[].class)
+                    .getResultList();
+
 
             // Takes result set metadata and adds column names to the table model
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            for (int i = 1; i <= columnCount; i++) {
-                model.addColumn(metaData.getColumnLabel(i));
-            }
+            model.addColumn("Category");
+            model.addColumn("Establishments");
+            model.addColumn("AverageNoOfRooms");
+            model.addColumn("AverageNoOfBeds");
 
             // enters the result set into the table model
-            while (rs.next()) {
-                String[] row = new String[columnCount];
-                for (int i = 1; i <= columnCount; i++) {
-                    row[i - 1] = rs.getString(i);
-                }
+
+            for (Object[] row : results) {
                 model.addRow(row);
             }
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             System.err.println("Database error: " + e.getMessage());
         }
     }

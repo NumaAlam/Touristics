@@ -1,26 +1,27 @@
 package US2;
 
-import MyApp.Menu;
+import database.HibernateUtil;
+import hotels.Hotel;
+import jakarta.persistence.TypedQuery;
+import occupancies.Occupancy;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class Table extends JFrame {
 
     // static list to store hotel IDs from the database.
     // Index 0 is reserved for "All"
-    static ArrayList<Integer> hotelIDs = new ArrayList<>();
     // initialize tables and comboboxes
     JTable table;
 
@@ -34,74 +35,38 @@ public class Table extends JFrame {
 
     JComboBox<String> monthComboBox;
 
-    JComboBox<String> hotelIDComboBox;
+    JComboBox<Hotel> hotelIDComboBox;
 
     // initialize constructor
     public Table() {
         defineFrame();
         initComponents();
         addActions();
-        fillTable_SQL(-1, null, 0, 0);  // import data from SQL DBS
+        fillTable_Hibernate(-1, null, 0, 0);  // import data from SQL DBS
         addComponents();
         backButton();
     }
 
     // filter actions
     private void addActions() {
+
         categoryComboBox.addActionListener(e -> {
-            String selectedCategory = (String) categoryComboBox.getSelectedItem();
-            if (selectedCategory.equals("All")) {
-                selectedCategory = null; // no filter
-            }
-            String selectedYear;
-            if (yearComboBox.getSelectedItem().equals("All")) {
-                selectedYear = "0"; // no filter
-            } else {
-                selectedYear = (String) yearComboBox.getSelectedItem();
-            }
-            fillTable_SQL(hotelIDs.get(hotelIDComboBox.getSelectedIndex()), selectedCategory, Integer.parseInt(selectedYear), monthComboBox.getSelectedIndex());
+            updateTable();
         });
 
         yearComboBox.addActionListener(e -> {
-            String selectedCategory = (String) categoryComboBox.getSelectedItem();
-            if (selectedCategory.equals("All")) {
-                selectedCategory = null;
-            }
-            String selectedYear = (String) yearComboBox.getSelectedItem();
-            if (selectedYear.equals("All")) {
-                selectedYear = "0";
-            }
-            fillTable_SQL(hotelIDs.get(hotelIDComboBox.getSelectedIndex()), selectedCategory, Integer.parseInt(selectedYear), monthComboBox.getSelectedIndex());
+            updateTable();
         });
 
         monthComboBox.addActionListener(e -> {
-            String selectedCategory = (String) categoryComboBox.getSelectedItem();
-            if (selectedCategory.equals("All")) {
-                selectedCategory = null;
-            }
-            String selectedYear;
-            if (yearComboBox.getSelectedItem().equals("All")) {
-                selectedYear = "0";
-            } else {
-                selectedYear = (String) yearComboBox.getSelectedItem();
-            }
-            fillTable_SQL(hotelIDs.get(hotelIDComboBox.getSelectedIndex()), selectedCategory, Integer.parseInt(selectedYear), monthComboBox.getSelectedIndex());
+            updateTable();
         });
 
         hotelIDComboBox.addActionListener(e -> {
-            String selectedCategory = (String) categoryComboBox.getSelectedItem();
-            if (selectedCategory.equals("All")) {
-                selectedCategory = null;
-            }
-            String selectedYear;
-            if (yearComboBox.getSelectedItem().equals("All")) {
-                selectedYear = "0";
-            } else {
-                selectedYear = (String) yearComboBox.getSelectedItem();
-            }
-            fillTable_SQL(hotelIDs.get(hotelIDComboBox.getSelectedIndex()), selectedCategory, Integer.parseInt(selectedYear), monthComboBox.getSelectedIndex());
+            updateTable();
         });
     }
+
 
     // Define the initialized components of the table. fills the ComboBoxes with the available options.
     private void initComponents() {
@@ -145,20 +110,19 @@ public class Table extends JFrame {
 
         // fill the hotel combobox and hotel list with all hotels from the database
         hotelIDComboBox = new JComboBox<>();
-        hotelIDComboBox.addItem("All");
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                "dev",
-                "dev")) {
-            String sql = "SELECT id, name FROM hotels";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            hotelIDs.add(-1); // index 0 is reserved for "All"
-            while (rs.next()) {
-                hotelIDComboBox.addItem(rs.getString("name"));
-                hotelIDs.add(rs.getInt("id"));
+        Hotel allOption = new Hotel();
+        allOption.setName("All");
+        allOption.setId(-1);
+        hotelIDComboBox.addItem(allOption);
+        try (Session session = HibernateUtil.getSessionFactory().openSession();) {
+            List<Hotel> hotels = session
+                    .createQuery("from Hotel", Hotel.class)
+                    .list();
+            for (Hotel hotel : hotels) {
+                hotelIDComboBox.addItem(hotel);
             }
-        } catch (SQLException e) {
+
+        } catch (HibernateException e) {
             System.err.println("Database error: " + e.getMessage());
         }
 
@@ -200,73 +164,59 @@ public class Table extends JFrame {
     }
 
     // Dynamically fills the table with data from the database. depending on the selected filters
-    private static void fillTable_SQL(int hotelId, String category, int year, int month) {
-        model.setRowCount(0); // Vorherige Tabellenzeilen löschen
+    private void fillTable_Hibernate(int hotelId, String category, int year, int month) {
+        model.setRowCount(0); // clear previous rows
 
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                "dev",
-                "dev")) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
-            // Base SQl Query
-            String sql = "SELECT h.name, h.category, o.year, o.month, o.rooms, o.usedRooms, o.beds, o.usedBeds\n" +
-                    "FROM occupancies o INNER JOIN hotels h ON o.id = h.id\n" +
-                    "WHERE 1=1"; // WHERE part of query started to add the other filters
+            StringBuilder hql = new StringBuilder("FROM Occupancy o JOIN FETCH o.hotel WHERE 1=1");
 
-            int paramIndex = 1;
-
-            // dynamically add filters to the query
+            // Dynamically append the filters to the HQL string
             if (hotelId != -1) {
-                sql += " AND o.id = ?";
-                paramIndex++;
+                hql.append(" AND o.hotel.id = :hotelId");
             }
             if (category != null) {
-                sql += " AND h.category >= ?"; // shows all hotels with the same category or higher
-                paramIndex++;
+                hql.append(" AND o.hotel.category >= :category");
             }
             if (year != 0) {
-                sql += " AND o.year = ?";
-                paramIndex++;
+                hql.append(" AND o.year = :year");
             }
             if (month != 0) {
-                sql += " AND o.month = ?";
+                hql.append(" AND o.month = :month");
             }
 
-            PreparedStatement ps = conn.prepareStatement(sql);
-            paramIndex = 1;
-
-            // parameters for the query
+            // Create the query and set the parameters
+            TypedQuery<Occupancy> query = session.createQuery(hql.toString(), Occupancy.class);
             if (hotelId != -1) {
-                ps.setInt(paramIndex, hotelId);
-                paramIndex++;
+                query.setParameter("hotelId", hotelId);
             }
             if (category != null) {
-                ps.setString(paramIndex, category);
-                paramIndex++;
+                query.setParameter("category", category);
             }
             if (year != 0) {
-                ps.setInt(paramIndex, year);
-                paramIndex++;
+                query.setParameter("year", year);
             }
             if (month != 0) {
-                ps.setInt(paramIndex, month);
+                query.setParameter("month", month);
             }
 
-            ResultSet rs = ps.executeQuery();
-
-            // Enter the data into the table
-            while (rs.next()) {
-                String[] row = new String[8];
-                for (int i = 1; i <= 8; i++) {
-                    if (i == 4) {
-                        row[i-1] = Month.of(rs.getInt("month")).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-                    } else {
-                        row[i - 1] = rs.getString(i);
-                    }
-                }
-                model.addRow(row);
+            // Execute the query and populate the table
+            List<Occupancy> results = query.getResultList();
+            for (Occupancy occupancy : results) {
+                model.addRow(new Object[]{
+                        occupancy.getHotel().getName(),
+                        occupancy.getHotel().getCategory(),
+                        occupancy.getYear(),
+                        Month.of(occupancy.getMonth()).getDisplayName(TextStyle.FULL, Locale.ENGLISH),
+                        occupancy.getRooms(),
+                        occupancy.getUsedRooms(),
+                        occupancy.getBeds(),
+                        occupancy.getUsedBeds()
+                });
             }
-        } catch (SQLException e) {
+
+
+        } catch (HibernateException e) {
             System.err.println("Database error: " + e.getMessage());
         }
     }
@@ -276,4 +226,17 @@ public class Table extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(YearMonth.from(LocalDate.now()) + " (final results)");
     }
+
+    private void updateTable() {
+        String selectedCategory = (String) categoryComboBox.getSelectedItem();
+        if ("All".equals(selectedCategory)) {
+            selectedCategory = null;
+        }
+        String selectedYear = (String) yearComboBox.getSelectedItem();
+        if ("All".equals(selectedYear)) {
+            selectedYear = "0";
+        }
+        fillTable_Hibernate(((Hotel) hotelIDComboBox.getSelectedItem()).getId(), selectedCategory, Integer.parseInt(selectedYear), monthComboBox.getSelectedIndex());
+    }
+
 }

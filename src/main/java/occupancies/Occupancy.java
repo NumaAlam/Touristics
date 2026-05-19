@@ -1,5 +1,6 @@
 package occupancies;
 
+import hotels.Hotel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,5 +37,9 @@ public class Occupancy {
 
     @Column(name = "usedBeds")
     private int usedBeds;
+
+    @ManyToOne
+    @JoinColumn(name = "id", insertable = false, updatable = false)
+    private Hotel hotel;
 
 }

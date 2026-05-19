@@ -148,7 +148,7 @@ public class Table extends JFrame {
         panel.add(yearComboBox);
         panel.add(new JLabel("Month:"));
         panel.add(monthComboBox);
-        panel.add(new JLabel("Hotel ID:"));
+        panel.add(new JLabel("Hotel name:"));
         panel.add(hotelIDComboBox);
     }
 

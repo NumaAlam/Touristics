@@ -15,8 +15,9 @@ import lombok.NoArgsConstructor;
 public class Occupancy {
 
     @Id
-    @Column(name = "id")
-    private int id;
+    @ManyToOne
+    @JoinColumn(name = "id")
+    private Hotel hotel;
 
     @Id
     @Column(name = "year")
@@ -37,9 +38,5 @@ public class Occupancy {
 
     @Column(name = "usedBeds")
     private int usedBeds;
-
-    @ManyToOne
-    @JoinColumn(name = "id", insertable = false, updatable = false)
-    private Hotel hotel;
 
 }

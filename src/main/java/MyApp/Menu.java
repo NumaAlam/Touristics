@@ -21,6 +21,8 @@ public class Menu extends JFrame {
 
     JMenuItem transactionListMenuItem = new JMenuItem("Transaction List per Hotel");
 
+    JMenuItem importTransactionMenuItem = new JMenuItem("Import Transactions");
+
     public Menu() {
         setSize(300, 200);
         menu.add(helpMenuItem);
@@ -31,6 +33,7 @@ public class Menu extends JFrame {
         menu.add(transactionListMenuItem);
         menu.add(exitMenuItem);
         menu.add(userManagementMenuItem);
+        menu.add(importTransactionMenuItem);
 
         menuBar.add(menu);
         setJMenuBar(menuBar);
@@ -70,6 +73,10 @@ public class Menu extends JFrame {
 
         transactionListMenuItem.addActionListener(e -> {
             new US10.TransactionListWindow().setVisible(true);
+        });
+
+        importTransactionMenuItem.addActionListener(e -> {
+            new US16.ImportWindow().setVisible(true);
         });
 
 

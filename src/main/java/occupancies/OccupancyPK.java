@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 public class OccupancyPK {
-    private int id;
+    private int hotel;
     private int year;
     private int month;
 }

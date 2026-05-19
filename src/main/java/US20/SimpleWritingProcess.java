@@ -1,4 +1,4 @@
-package write;
+package US20;
 
 import hotels.Hotel;
 import hotels.Hotellimporter;

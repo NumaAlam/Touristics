@@ -39,4 +39,8 @@ public class Occupancy {
     @Column(name = "usedBeds")
     private int usedBeds;
 
+    public String toCSV() {
+        return hotel.getId() + "," + year + "," + month + "," + rooms + "," + usedRooms + "," +
+                beds + "," + usedBeds;
+    }
 }

@@ -91,7 +91,11 @@ public class ImportWindow extends JFrame {
                 newEntry.setBeds(hotel.getNoBeds());
                 newEntry.setRooms(hotel.getNoRooms());
 
-                if (newEntry.getUsedRooms() <= newEntry.getRooms() && newEntry.getUsedBeds() <= newEntry.getBeds()) {
+                if (year <= 0) {
+                    errorList.add("Row " + rowNum + " rejected: Year must be greater than 0.");
+                } else if (month < 1 || month > 12) {
+                    errorList.add("Row " + rowNum + " rejected: Month must be between 1 and 12.");
+                } else if (newEntry.getUsedRooms() <= newEntry.getRooms() && newEntry.getUsedBeds() <= newEntry.getBeds()) {
                     occupancyList.add(newEntry);
                 } else {
                     errorList.add("Row " + rowNum + " rejected: Used capacity exceeds hotel maximums.");

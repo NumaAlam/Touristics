@@ -12,78 +12,98 @@ import users.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
 
 public class LoginWindow extends JFrame {
-        public LoginWindow() {
-            setTitle("Login");
-            setSize(300, 150);
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setLocationRelativeTo(null);
-            setLayout(new BorderLayout());
 
-            JButton button = new JButton("Login");
-            JTextField usernameField = new JTextField();
-            JPasswordField passwordField = new JPasswordField();
+    public LoginWindow() {
+        setTitle("Login");
+        setSize(300, 150);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-            JPanel panel = new JPanel(new GridLayout(2,2,10,10));
+        JButton button = new JButton("Login");
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
 
-            panel.add(new JLabel("Username:"));
-            panel.add(usernameField);
-            panel.add(new JLabel("Password:"));
-            panel.add(passwordField);
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
 
-            panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        panel.add(new JLabel("Username:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
 
-            add(panel, BorderLayout.CENTER);
-            add(button, BorderLayout.SOUTH);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-            button.addActionListener(e -> {
-                String username = usernameField.getText().trim();
-                String password = new String(passwordField.getPassword());
+        add(panel, BorderLayout.CENTER);
+        add(button, BorderLayout.SOUTH);
 
-                if (username.isBlank()) {
-                    JOptionPane.showMessageDialog(null, "Please enter a username");
+        button.addActionListener(e -> {
+            String username = usernameField.getText().trim();
+            String password = new String(passwordField.getPassword());
+
+            if (username.isBlank()) {
+                JOptionPane.showMessageDialog(null, "Please enter a username");
+                return;
+            }
+
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                User user = session
+                        .createQuery("from User where username = :username", User.class)
+                        .setParameter("username", username)
+                        .uniqueResult();
+
+                if (user == null) {
+                    JOptionPane.showMessageDialog(null, "User or password invalid");
                     return;
                 }
 
-                try (Session session = HibernateUtil.getSessionFactory().openSession();) {
-                    User user = session
-                            .createQuery("from User where username = :username", User.class)
-                            .setParameter("username", username)
-                            .uniqueResult();
-                    if (user == null) {
-                        JOptionPane.showMessageDialog(null, "User or password invalid"); //if the user is not found, an error message is displayed
-                    } else if (BCrypt.checkpw(password, user.getPasswordHash())) { //if the password is correct, the user is logged in
-                        MyApp.Session.currentRole = user.getRole();
-                        MyApp.Session.canDelete = Boolean.TRUE.equals(user.getCanDelete());
-
-                        if (user.getRole().equals("Hotel Representative")) {
-                            new HotelRepWindow(user.getHotelID()).setVisible(true);
-                            dispose();
-                        } else if (user.getRole().equals("Senior")) {
-                            new SeniorWindow("Welcome Senior").setVisible(true);
-                            dispose();
-                        } else if (user.getRole().equals("Senior_Admin")) {
-                            new SeniorAdminWindow().setVisible(true);
-                            dispose();
-                        } else {
-                            new HeadWindow().setVisible(true);
-                            dispose();
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "User or password invalid"); // if the password is incorrect, an error message is displayed
-                    }
-
-                } catch (HibernateException ex) {
-                    System.err.println("Database error: " + ex.getMessage());
+                if (!BCrypt.checkpw(password, user.getPasswordHash())) {
+                    JOptionPane.showMessageDialog(null, "User or password invalid");
+                    return;
                 }
 
+                // Store the current user's role globally for permission checks in other windows.
+                MyApp.Session.currentRole = user.getRole();
 
-            });
+                // Store delete permission globally for features such as deleting hotel data.
+                MyApp.Session.canDelete = Boolean.TRUE.equals(user.getCanDelete());
 
+                // US25: Store the assigned hotel ID only for hotel representatives.
+                // Other roles must not keep a hotel restriction from a previous login.
+                if (user.getRole().equals("Hotel Representative")) {
+                    MyApp.Session.currentHotelId = user.getHotelID();
 
+                    new HotelRepWindow(user.getHotelID()).setVisible(true);
+                    dispose();
 
+                } else {
+                    // US25: Clear the hotel restriction for all other roles.
+                    // This prevents a hotel ID from a previous hotel representative login from being reused.
+                    MyApp.Session.currentHotelId = null;
 
-        }
+                    if (user.getRole().equals("Senior")) {
+                        new SeniorWindow("Welcome Senior").setVisible(true);
+                        dispose();
+
+                    } else if (user.getRole().equals("Senior_Admin")) {
+                        new SeniorAdminWindow().setVisible(true);
+                        dispose();
+
+                    } else {
+                        new HeadWindow().setVisible(true);
+                        dispose();
+                    }
+                }
+
+            } catch (HibernateException ex) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Database error: " + ex.getMessage(),
+                        "Database error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+    }
 }

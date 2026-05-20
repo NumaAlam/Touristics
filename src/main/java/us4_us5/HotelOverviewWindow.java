@@ -1,28 +1,76 @@
 package us4_us5;
 
+import database.HibernateUtil;
 import MyApp.Menu; // Needed to return from the hotel overview window back to the main menu.
+import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
+
 
 import javax.swing.*; // Swing components used for the graphical user interface, such as JFrame, JTable, JButton, JPanel and JOptionPane.
 import javax.swing.table.DefaultTableModel; // Table model used to define columns and add rows to the JTable.
 import java.awt.*; // AWT layout classes, especially BorderLayout, used to arrange GUI components inside the window.
-import java.sql.*; // SQL classes used for database connection, SQL statements, result sets and SQL exception handling.
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 
 public class HotelOverviewWindow extends JFrame {
     private JTable table; // JTable is the visible table component shown to the user.
     private DefaultTableModel model; // DefaultTableModel stores the table structure and data rows.
+    private JTextField nameFilterField;
+    private JTextField addressFilterField;
+
+    private Integer restrictedHotelId;
 
     public HotelOverviewWindow() {
+        this(null);
+    }
+
+    public HotelOverviewWindow(Integer restrictedHotelId) {
+        this.restrictedHotelId = restrictedHotelId;
+
         defineFrame(); // Defines the basic frame settings such as title, size and layout.
         initComponents();  // Initializes the table and its columns.
+        addFilterPanel();
         fillTable();  // Loads hotel data from the database and fills the table.
         addComponents(); // Adds the table to the window.
         addButtonPanel(); // Adds the buttons below the table.
+
+    }
+
+    private void addFilterPanel() {
+        JPanel filterPanel = new JPanel(new GridLayout(2, 3, 5, 5));
+
+        nameFilterField = new JTextField();
+        addressFilterField = new JTextField();
+
+        JButton filterButton = new JButton("Apply Filter");
+        JButton clearButton = new JButton("Clear Filter");
+
+        filterPanel.add(new JLabel("Filter by name:"));
+        filterPanel.add(nameFilterField);
+        filterPanel.add(filterButton);
+
+        filterPanel.add(new JLabel("Filter by address:"));
+        filterPanel.add(addressFilterField);
+        filterPanel.add(clearButton);
+
+        filterPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        add(filterPanel, BorderLayout.NORTH);
+
+        filterButton.addActionListener(e -> refreshTable());
+
+        clearButton.addActionListener(e -> {
+            nameFilterField.setText("");
+            addressFilterField.setText("");
+            refreshTable();
+        });
     }
 
     private void defineFrame() {
         setTitle("Hotel Overview"); // Sets the title displayed in the window header.
         setSize(1100, 500); // Sets the window size large enough to display the hotel overview table.
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Closes the application when this window is closed.
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // Centers the window on the screen.
         setLayout(new BorderLayout());  // Uses BorderLayout so the table can be placed in the center and buttons at the bottom.
     }
@@ -46,75 +94,101 @@ public class HotelOverviewWindow extends JFrame {
     }
 
     private void fillTable() {
-        // SQL query for US4:
-        // It loads all hotels and adds the latest transactional data per hotel.
-        // OUTER APPLY ensures that hotels without transactional data are still shown.
-        // Three apostrophes to make multi-line Strings
-        String sql = """ 
-                        SELECT 
-                            h.id,
-                            h.name,
-                            h.address,
-                            h.noRooms,
-                            h.noBeds,
-                            o.year AS lastYear,
-                            o.month AS lastMonth,
-                            o.usedRooms,
-                            o.usedBeds
-                        FROM dbo.hotels h
-                        OUTER APPLY (
-                            SELECT TOP 1
-                                occ.year,
-                                occ.month,
-                                occ.usedRooms,
-                                occ.usedBeds
-                            FROM dbo.occupancies occ
-                            WHERE occ.id = h.id
-                            ORDER BY occ.year DESC, occ.month DESC
-                            ) o
-                            ORDER BY h.id;
-                            """;
-                // Opens the database connection and executes the SQL query.
-                try (Connection conn = DriverManager.getConnection(
-                        "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                                "dev",
-                                "dev");
-                        Statement stmt = conn.createStatement();
-                        ResultSet rs = stmt.executeQuery(sql)) {
-                    // Reads every result row and adds it to the table model.
-                    while (rs.next()) {
-                        model.addRow(new Object[]{
-                                rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("address"),
-                                rs.getInt("noRooms"),
-                                rs.getInt("noBeds"),
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                h.id,
+                h.name,
+                h.address,
+                h.noRooms,
+                h.noBeds,
+                o.year AS lastYear,
+                o.month AS lastMonth,
+                o.usedRooms,
+                o.usedBeds
+            FROM dbo.hotels h
+            OUTER APPLY (
+                SELECT TOP 1
+                    occ.year,
+                    occ.month,
+                    occ.usedRooms,
+                    occ.usedBeds
+                FROM dbo.occupancies occ
+                WHERE occ.id = h.id
+                ORDER BY occ.year DESC, occ.month DESC
+            ) o
+            WHERE 1 = 1
+            """);
 
-                                // getObject is used because these values may be NULL
-                                // if no transactional data exists for a hotel yet.
-                                rs.getObject("lastYear"),
-                                rs.getObject("lastMonth"),
-                                rs.getObject("usedRooms"),
-                                rs.getObject("usedBeds")
+        String nameFilter = "";
+        String addressFilter = "";
 
+        if (nameFilterField != null) {
+            nameFilter = nameFilterField.getText().trim().toLowerCase();
+        }
 
-                        });
-                    }
-                } catch (SQLException e) {
-                    // Shows an error dialog if the database connection or SQL query fails.
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Database error: " + e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
+        if (addressFilterField != null) {
+            addressFilter = addressFilterField.getText().trim().toLowerCase();
+        }
+
+        if (!nameFilter.isEmpty()) {
+            sql.append(" AND LOWER(h.name) LIKE :nameFilter ");
+        }
+
+        if (!addressFilter.isEmpty()) {
+            sql.append(" AND LOWER(h.address) LIKE :addressFilter ");
+        }
+
+        if (restrictedHotelId != null) {
+            sql.append(" AND h.id = :restrictedHotelId ");
+        }
+
+        sql.append(" ORDER BY h.id ");
+
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            NativeQuery<Object[]> query = session.createNativeQuery(sql.toString(), Object[].class);
+
+            if (!nameFilter.isEmpty()) {
+                query.setParameter("nameFilter", "%" + nameFilter + "%");
+            }
+
+            if (!addressFilter.isEmpty()) {
+                query.setParameter("addressFilter", "%" + addressFilter + "%");
+            }
+
+            if (restrictedHotelId != null) {
+                query.setParameter("restrictedHotelId", restrictedHotelId);
+            }
+
+            List<Object[]> rows = query.getResultList();
+
+            for (Object[] row : rows) {
+                model.addRow(new Object[]{
+                        row[0], // ID
+                        row[1], // Name
+                        row[2], // Address
+                        row[3], // Rooms
+                        row[4], // Beds
+                        row[5], // Last Year
+                        row[6], // Last Month
+                        row[7], // Used Rooms
+                        row[8]  // Used Beds
+                });
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Hibernate error while loading hotel overview: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     // Refresh Button
     private void refreshTable() {
-        model.setRowCount(0); // löscht alle aktuellen Zeilen
-        fillTable();          // lädt Daten neu aus der Datenbank
+        model.setRowCount(0);
+        fillTable();
     }
 
     private void addComponents() {
@@ -123,33 +197,24 @@ public class HotelOverviewWindow extends JFrame {
     }
 
     private void addButtonPanel() {
-        JPanel buttonPanel = new JPanel();  // Panel used to place multiple buttons at the bottom of the window.
+        JPanel buttonPanel = new JPanel();
 
-        JButton editButton = new JButton("Edit selected Hotel"); // Button for US5: opens the selected hotel in edit mode.
-        JButton backButton = new JButton("Back to Menu");   // Button to close the overview window.
-
-        // Button for US6: opens the transactional data entry window.
+        JButton editButton = new JButton("Edit selected Hotel");
         JButton transactionButton = new JButton("Add Transaction");
-
-        // Adds all buttons to the button panel.
-        buttonPanel.add(editButton);
-        buttonPanel.add(backButton);
-        //US6
-        buttonPanel.add(transactionButton);
-
-        add(buttonPanel, BorderLayout.SOUTH); // Places the button panel at the bottom of the window.
-        // Connects button actions to their functions.
-        addEditButtonFunction(editButton);
-        addBackButtonFunction(backButton);
-        //US6
-        addTransactionButtonFunction(transactionButton);
-
-        //Refresh button
         JButton refreshButton = new JButton("Refresh");
+        JButton backButton = new JButton("Back to Menu");
+
+        buttonPanel.add(editButton);
+        buttonPanel.add(transactionButton);
         buttonPanel.add(refreshButton);
+        buttonPanel.add(backButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        addEditButtonFunction(editButton);
+        addTransactionButtonFunction(transactionButton);
         addRefreshButtonFunction(refreshButton);
-
-
+        addBackButtonFunction(backButton);
     }
 
     private void addBackButtonFunction(JButton backButton) {
@@ -176,8 +241,17 @@ public class HotelOverviewWindow extends JFrame {
             }
             // Reads the hotel ID from the first column of the selected row.
             int hotelId = (int) model.getValueAt(selectedRow, 0);
-            // Opens US5 edit window and passes the selected hotel ID.
-            new HotelEditWindow(hotelId).setVisible(true);
+
+            HotelEditWindow editWindow = new HotelEditWindow(hotelId);
+
+                    editWindow.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            refreshTable();
+                        }
+                    });
+
+                    editWindow.setVisible(true);
         });
     }
 
@@ -206,8 +280,17 @@ public class HotelOverviewWindow extends JFrame {
                 );
                 String hotelName = table.getValueAt(selectedRow, 1).toString();
 
-                // Open the transactional data entry window for the selected hotel
-                new US6.TransactionEntryWindow(hotelID, hotelName).setVisible(true);
+                US6.TransactionEntryWindow transactionWindow =
+                        new US6.TransactionEntryWindow(hotelID, hotelName);
+
+                transactionWindow.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        refreshTable();
+                    }
+                });
+
+                transactionWindow.setVisible(true);
             } else {
                 // No row selected — prompt the user to select a hotel before proceeding
                 JOptionPane.showMessageDialog(this, "Please select a hotel first.");

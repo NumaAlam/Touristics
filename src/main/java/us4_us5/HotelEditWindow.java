@@ -7,7 +7,7 @@ import org.hibernate.Transaction;
 
 import javax.swing.*; // Swing components used for the graphical user interface, such as JFrame, JTextField, JButton, JPanel and JOptionPane.
 import java.awt.*; // AWT layout classes, especially BorderLayout and GridLayout, used to arrange the edit form.
-import java.sql.*; // SQL classes used for database connection, PreparedStatement, ResultSet and SQL exception handling.
+
 
 
 public class HotelEditWindow extends JFrame {
@@ -30,11 +30,36 @@ public class HotelEditWindow extends JFrame {
     public HotelEditWindow(int hotelId) {
         this.hotelId = hotelId; // Saves selected hotel ID for loading and updating the correct database record.
 
+        // US25: Access control for hotel representatives.
+        // Representatives may only open the master data of their assigned hotel.
+        if (!isHotelAccessAllowed()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Access denied. You can only open your assigned hotel.",
+                    "Access denied",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            dispose();
+            return;
+        }
+
         defineFrame(); // Defines the basic frame settings.
         initFields(); // Creates all text fields.
         addComponents(); // Adds labels and text fields to the form.
         loadHotelData(); // Loads the selected hotel data from the database.
         addButtonPanel(); // Adds Save and Close buttons.
+    }
+
+    // US25: Checks whether the currently logged-in user is allowed to access this hotel.
+    // Senior users may access all hotels.
+    // Hotel representatives may only access the hotel stored in Session.currentHotelId.
+    private boolean isHotelAccessAllowed() {
+        if ("Hotel Representative".equals(MyApp.Session.currentRole)) {
+            return MyApp.Session.currentHotelId != null
+                    && MyApp.Session.currentHotelId == hotelId;
+        }
+
+        return true;
     }
 
     private void defineFrame() {
@@ -154,11 +179,10 @@ public class HotelEditWindow extends JFrame {
         buttonPanel.add(saveButton);
         buttonPanel.add(closeButton);
 
-        if (MyApp.Session.currentRole.equals("Senior")) {
-            buttonPanel.add(deleteButton);
-            addDeleteButtonFunction(deleteButton);
-        }
-        if (MyApp.Session.currentRole.equals("Senior") || Boolean.TRUE.equals(MyApp.Session.canDelete)) {
+
+        if ("Senior".equals(MyApp.Session.currentRole)
+                || "Senior_Admin".equals(MyApp.Session.currentRole)
+                || Boolean.TRUE.equals(MyApp.Session.canDelete)) {
             buttonPanel.add(deleteButton);
             addDeleteButtonFunction(deleteButton);
         }
@@ -213,6 +237,18 @@ public class HotelEditWindow extends JFrame {
     }
 
     private void saveHotelData() {
+        // US25: Prevents hotel representatives from saving changes to hotels
+        // that are not assigned to their user account.
+        if (!isHotelAccessAllowed()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Access denied. You can only edit your assigned hotel.",
+                    "Access denied",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
         int noRooms;
         int noBeds;
 
@@ -259,8 +295,9 @@ public class HotelEditWindow extends JFrame {
             return;
         }
 
-        // SQL update statement for saving changes to the selected hotel master data record.
-        // The hotel ID is used in the WHERE clause so only one hotel is updated.
+
+        // Saves the edited hotel master data via Hibernate.
+        // Hibernate updates the database record when the transaction is committed.
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 

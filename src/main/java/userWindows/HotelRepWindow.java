@@ -3,6 +3,7 @@ package userWindows;
 import MyApp.LoginWindow;
 import US6.TransactionEntryWindow;
 import US10.TransactionListWindow;
+import us4_us5.HotelOverviewWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,17 +40,31 @@ public class HotelRepWindow extends JFrame {
 
         // ===== CENTER =====
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(4, 1, 15, 15));
+        centerPanel.setLayout(new GridLayout(5, 1, 15, 15));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
 
         JLabel hotelInfo = new JLabel("Assigned Hotel ID: " + hotelID, SwingConstants.CENTER);
         hotelInfo.setFont(new Font("Arial", Font.PLAIN, 16));
 
+        JButton viewHotelDataButton = new JButton("View My Hotel Data");
         JButton addTransactionButton = new JButton("Add Transaction Data");
         JButton viewTransactionsButton = new JButton("View Transaction Data");
         JButton logoutButton = new JButton("Logout");
 
         // ===== BUTTON ACTIONS =====
+
+        // US24/US25: Opens the hotel overview restricted to the representative's assigned hotel.
+        // This ensures that the hotel representative can only see and access their own hotel data.
+        viewHotelDataButton.addActionListener(e -> {
+            try {
+                HotelOverviewWindow window = new HotelOverviewWindow(hotelID);
+                window.setVisible(true);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Could not open hotel overview.");
+            }
+        });
 
         addTransactionButton.addActionListener(e -> {
             try {
@@ -89,6 +104,7 @@ public class HotelRepWindow extends JFrame {
         // ===== ADD COMPONENTS =====
 
         centerPanel.add(hotelInfo);
+        centerPanel.add(viewHotelDataButton); // US24/US25: Adds the button that allows the hotel representative to view their own hotel master data.
         centerPanel.add(addTransactionButton);
         centerPanel.add(viewTransactionsButton);
         centerPanel.add(logoutButton);

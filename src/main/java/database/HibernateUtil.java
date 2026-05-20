@@ -1,6 +1,8 @@
 package database;
 
 import hotels.Hotel;
+import occupancies.Occupancy;
+import users.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -19,6 +21,8 @@ public class HibernateUtil {
             return new Configuration()
                     .configure()
                     .addAnnotatedClass(Hotel.class)
+                    .addAnnotatedClass(Occupancy.class)
+                    .addAnnotatedClass(User.class)
                     .buildSessionFactory();
         } catch (Throwable ex) {
             System.err.println("SessionFactory could not be created.");

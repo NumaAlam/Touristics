@@ -12,6 +12,7 @@ import java.time.Year;
  */
 public class TransactionListWindow extends JFrame {
 
+    private final int hotelID;
     private JTable table;
     private DefaultTableModel model;
     private JComboBox<String> hotelComboBox;
@@ -27,7 +28,9 @@ public class TransactionListWindow extends JFrame {
     private static final String DB_USER = "dev";
     private static final String DB_PASS = "dev";
 
-    public TransactionListWindow() {
+    public TransactionListWindow(int hotelID) {
+        this.hotelID = hotelID;
+
         defineFrame();
         initComponents();
         addComponents();
@@ -61,9 +64,12 @@ public class TransactionListWindow extends JFrame {
         hotelIDs.clear();
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
-            String sql = "SELECT id, name FROM hotels ORDER BY name";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            String sql = "SELECT id, name FROM hotels WHERE id = ?";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, hotelID);
+
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 hotelComboBox.addItem(rs.getString("name"));
                 hotelIDs.add(rs.getInt("id"));

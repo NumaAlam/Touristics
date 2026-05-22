@@ -9,7 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 
 public class SeniorWindow extends JFrame {
-    public SeniorWindow(String text) {
+    private final int hotelID;
+
+    public SeniorWindow(String text, int  hotelID) {
+        this.hotelID = hotelID;
 
         setTitle(text);
         setSize(300, 200);
@@ -18,7 +21,7 @@ public class SeniorWindow extends JFrame {
 
         JButton menuButton = new JButton("Main Menu");
         menuButton.addActionListener(e -> {
-            new Menu().setVisible(true);
+            new Menu(hotelID).setVisible(true);
             dispose();
         });
 

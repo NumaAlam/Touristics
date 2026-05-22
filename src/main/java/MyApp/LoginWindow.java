@@ -83,7 +83,7 @@ public class LoginWindow extends JFrame {
                     MyApp.Session.currentHotelId = null;
 
                     if (user.getRole().equals("Senior")) {
-                        new SeniorWindow("Welcome Senior").setVisible(true);
+                        new SeniorWindow("Welcome Senior", user.getHotelID()).setVisible(true);
                         dispose();
 
                     } else if (user.getRole().equals("Senior_Admin")) {

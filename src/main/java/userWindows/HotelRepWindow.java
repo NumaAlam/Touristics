@@ -85,7 +85,7 @@ public class HotelRepWindow extends JFrame {
             try {
 
                 TransactionListWindow window =
-                        new TransactionListWindow();
+                        new TransactionListWindow(hotelID);
 
                 window.setVisible(true);
 

@@ -133,22 +133,21 @@ public class TransactionListWindow extends JFrame {
         // --- Filter panel ---
         JPanel filterPanel = new JPanel();
 
-        filterPanel.add(new JLabel("Hotel:"));
-        filterPanel.add(hotelComboBox);
-
-        filterPanel.add(Box.createHorizontalStrut(20));
-
-        filterPanel.add(new JLabel("From Year:"));
-        filterPanel.add(fromYearComboBox);
-        filterPanel.add(new JLabel("From Month:"));
-        filterPanel.add(fromMonthComboBox);
-
-        filterPanel.add(Box.createHorizontalStrut(10));
-
-        filterPanel.add(new JLabel("To Year:"));
-        filterPanel.add(toYearComboBox);
-        filterPanel.add(new JLabel("To Month:"));
-        filterPanel.add(toMonthComboBox);
+        if (hotelID == null) {
+            // Senior sieht alles
+            filterPanel.add(new JLabel("Hotel:"));
+            filterPanel.add(hotelComboBox);
+            filterPanel.add(Box.createHorizontalStrut(20));
+            filterPanel.add(new JLabel("From Year:"));
+            filterPanel.add(fromYearComboBox);
+            filterPanel.add(new JLabel("From Month:"));
+            filterPanel.add(fromMonthComboBox);
+            filterPanel.add(Box.createHorizontalStrut(10));
+            filterPanel.add(new JLabel("To Year:"));
+            filterPanel.add(toYearComboBox);
+            filterPanel.add(new JLabel("To Month:"));
+            filterPanel.add(toMonthComboBox);
+        }
 
         add(filterPanel, BorderLayout.NORTH);
 
@@ -159,11 +158,13 @@ public class TransactionListWindow extends JFrame {
 
     private void addActions() {
         // Every dropdown triggers a refresh so the table always reflects the current filter selection
-        hotelComboBox.addActionListener(e -> refreshTable());
-        fromYearComboBox.addActionListener(e -> refreshTable());
-        fromMonthComboBox.addActionListener(e -> refreshTable());
-        toYearComboBox.addActionListener(e -> refreshTable());
-        toMonthComboBox.addActionListener(e -> refreshTable());
+        if (hotelID == null) {
+            hotelComboBox.addActionListener(e -> refreshTable());
+            fromYearComboBox.addActionListener(e -> refreshTable());
+            fromMonthComboBox.addActionListener(e -> refreshTable());
+            toYearComboBox.addActionListener(e -> refreshTable());
+            toMonthComboBox.addActionListener(e -> refreshTable());
+        }
 
         // Load initial data if hotels exist
         if (hotelComboBox.getItemCount() > 0) {

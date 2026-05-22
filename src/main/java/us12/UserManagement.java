@@ -46,7 +46,7 @@ public class UserManagement extends JFrame {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             List<User> users = session.createQuery("from User", User.class).list();
             for (User u : users) {
-                boolean canDel = Boolean.TRUE.equals(u.getCanDelete()) || u.getRole().equals("Senior");
+                boolean canDel = UserValidator.canDelete(u.getCanDelete(), u.getRole());
                 model.addRow(new Object[]{
                         u.getId(),
                         u.getUsername(),
@@ -103,10 +103,9 @@ public class UserManagement extends JFrame {
         addButton.addActionListener(e -> {
             // Collect input via dialogs
             String username = JOptionPane.showInputDialog(this, "Username:");
-            if (username == null || username.isBlank()) return;
-
+            if (!UserValidator.isUsernameValid(username)) return;
             String password = JOptionPane.showInputDialog(this, "Password:");
-            if (password == null || password.isBlank()) return;
+            if (!UserValidator.isPasswordValid(password)) return;
 
             String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
             String role = (String) JOptionPane.showInputDialog(this,
@@ -149,7 +148,9 @@ public class UserManagement extends JFrame {
 
             int userId = (int) model.getValueAt(selectedRow, 0);
             String currentRole = (String) model.getValueAt(selectedRow, 2);
-
+            String currentUsername = (String) model.getValueAt(selectedRow, 1);
+            String newUsername = JOptionPane.showInputDialog(this, "New Username:", currentUsername);
+            if (!UserValidator.isUsernameValid(newUsername)) return;
             // Allow changing the role
             String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
             String newRole = (String) JOptionPane.showInputDialog(this,
@@ -170,6 +171,7 @@ public class UserManagement extends JFrame {
 
                 User user = session.get(User.class, userId);
                 user.setRole(newRole);
+                user.setUsername(newUsername);  // ← neu
                 user.setCanDelete(canDeleteOption == JOptionPane.YES_OPTION);
                 session.merge(user);// ← hier
                 if (resetPw == JOptionPane.YES_OPTION) {

@@ -1,5 +1,6 @@
 package MyApp;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import userWindows.SeniorWindow;
 
 import javax.swing.*;
@@ -7,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Menu extends JFrame {
-    private final int hotelID;
+    private final Integer hotelID;
 
     JMenuBar menuBar = new JMenuBar();
     JMenu menu = new JMenu("Menu");
@@ -24,7 +25,7 @@ public class Menu extends JFrame {
 
     JMenuItem importTransactionMenuItem = new JMenuItem("Import Transactions");
 
-    public Menu(int hotelID) {
+    public Menu(Integer hotelID) {
         this.hotelID = hotelID;
 
         setSize(300, 200);
@@ -47,7 +48,7 @@ public class Menu extends JFrame {
         });
         exitMenuItem.addActionListener(e -> {
             dispose();
-            new SeniorWindow("Welcome Senior", hotelID).setVisible(true);
+            new SeniorWindow("Welcome Senior").setVisible(true);
         });
         occupancyMenuItem.addActionListener(e -> {
             new US2.Table().setVisible(true);

@@ -12,7 +12,7 @@ import java.time.Year;
  */
 public class TransactionListWindow extends JFrame {
 
-    private final int hotelID;
+    private final Integer hotelID;
     private JTable table;
     private DefaultTableModel model;
     private JComboBox<String> hotelComboBox;
@@ -28,7 +28,7 @@ public class TransactionListWindow extends JFrame {
     private static final String DB_USER = "dev";
     private static final String DB_PASS = "dev";
 
-    public TransactionListWindow(int hotelID) {
+    public TransactionListWindow(Integer hotelID) {
         this.hotelID = hotelID;
 
         defineFrame();
@@ -64,10 +64,15 @@ public class TransactionListWindow extends JFrame {
         hotelIDs.clear();
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
-            String sql = "SELECT id, name FROM hotels WHERE id = ?";
-
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, hotelID);
+            PreparedStatement stmt;
+            if (hotelID == null) {
+                // Senior or other role with no hotel restriction — load all hotels
+                stmt = conn.prepareStatement("SELECT id, name FROM hotels ORDER BY name");
+            } else {
+                // Hotel rep — restrict to their hotel
+                stmt = conn.prepareStatement("SELECT id, name FROM hotels WHERE id = ?");
+                stmt.setInt(1, hotelID);
+            }
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {

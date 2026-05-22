@@ -9,10 +9,12 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class ImportWindow extends JFrame {
@@ -33,10 +35,17 @@ public class ImportWindow extends JFrame {
         JButton importButton = new JButton("Import Excel");
         importButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel files (*.xlsx)", "xlsx"));
+            fileChooser.setAcceptAllFileFilterUsed(false);
+
             int result = fileChooser.showOpenDialog(this);
 
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
+                if (!selectedFile.getName().toLowerCase().endsWith(".xlsx")) {
+                    JOptionPane.showMessageDialog(this, "Please select an .xlsx file.");
+                    return;
+                }
                 readExcelFile(selectedFile, (Hotel) hotelComboBox.getSelectedItem());
 
             }
@@ -66,20 +75,99 @@ public class ImportWindow extends JFrame {
 
             // Get the first sheet
             Sheet sheet = workbook.getSheetAt(0);
+
+            //Declare Hash set to store the keys
+            HashSet<String> keys = new HashSet<>();
             // Loop through the rows
             for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
                 Row row = sheet.getRow(rowNum);
-                if (row == null) continue;
-                Cell yearCell = row.getCell(0);
-                if (yearCell == null
-                        || yearCell.getCellType() == CellType.BLANK
-                        || yearCell.getCellType() != CellType.NUMERIC) {
+                if (row == null)  {
+                    errorList.add("Row " + rowNum + " rejected: Row is empty.");
                     continue;
                 }
-                int year = (int) row.getCell(0).getNumericCellValue();
-                int month = (int) row.getCell(1).getNumericCellValue();
-                int usedRooms = (int) row.getCell(2).getNumericCellValue();
-                int usedBeds = (int) row.getCell(3).getNumericCellValue();
+
+                Cell yearCell = row.getCell(0);
+                if (yearCell == null) {
+                    errorList.add("Row " + rowNum + " rejected: Year is empty.");
+                    continue;
+                } else if (yearCell.getCellType() == CellType.BLANK) {
+                    errorList.add("Row " + rowNum + " rejected: Year is blank.");
+                    continue;
+                } else if (yearCell.getCellType() != CellType.NUMERIC) {
+                    errorList.add("Row " + rowNum + " rejected: Year is not numeric.");
+                    continue;
+                } else if (Math.round(yearCell.getNumericCellValue()) != yearCell.getNumericCellValue()) {
+                    errorList.add("Row " + rowNum + " rejected: Year is not an integer.");
+                    continue;
+                } else if (yearCell.getNumericCellValue() < 1900) {
+                    errorList.add("Row " + rowNum + " rejected: Year must be greater than or equal to 1900.");
+                    continue;
+                }
+
+                Cell monthCell = row.getCell(1);
+                if (monthCell == null) {
+                    errorList.add("Row " + rowNum + " rejected: Month is empty.");
+                    continue;
+                } else if (monthCell.getCellType() == CellType.BLANK) {
+                    errorList.add("Row " + rowNum + " rejected: Month is blank.");
+                    continue;
+                } else if (monthCell.getCellType() != CellType.NUMERIC) {
+                    errorList.add("Row " + rowNum + " rejected: Month is not numeric.");
+                    continue;
+                } else if (Math.round(monthCell.getNumericCellValue()) != monthCell.getNumericCellValue()) {
+                    errorList.add("Row " + rowNum + " rejected: Month is not an integer.");
+                    continue;
+                } else if (monthCell.getNumericCellValue() < 1 || monthCell.getNumericCellValue() > 12) {
+                    errorList.add("Row " + rowNum + " rejected: Month must be between 1 and 12.");
+                    continue;
+                }
+
+                int year = (int) yearCell.getNumericCellValue();
+                int month = (int) monthCell.getNumericCellValue();
+                String key = year + "-" + month;
+                if (!keys.add(key)) {
+                    errorList.add("Row " + rowNum + " rejected: Duplicate Year-Month combination.");
+                    continue;
+                }
+
+                Cell uRCell = row.getCell(2);
+                if (uRCell == null) {
+                    errorList.add("Row " + rowNum + " rejected: Used Rooms is empty.");
+                    continue;
+                } else if (uRCell.getCellType() == CellType.BLANK) {
+                    errorList.add("Row " + rowNum + " rejected: Used Rooms is blank.");
+                    continue;
+                } else if (uRCell.getCellType() != CellType.NUMERIC) {
+                    errorList.add("Row " + rowNum + " rejected: Used Rooms is not numeric.");
+                    continue;
+                } else if (Math.round(uRCell.getNumericCellValue()) != uRCell.getNumericCellValue()) {
+                    errorList.add("Row " + rowNum + " rejected: Used Rooms is not an integer.");
+                    continue;
+                } else if (uRCell.getNumericCellValue() < 0) {
+                    errorList.add("Row " + rowNum + " rejected: Used Rooms must be greater than or equal to 0.");
+                    continue;
+                }
+
+                Cell uBCell = row.getCell(3);
+                if (uBCell == null) {
+                    errorList.add("Row " + rowNum + " rejected: Used Beds is empty.");
+                    continue;
+                } else if (uBCell.getCellType() == CellType.BLANK) {
+                    errorList.add("Row " + rowNum + " rejected: Used Beds is blank.");
+                    continue;
+                } else if (uBCell.getCellType() != CellType.NUMERIC) {
+                    errorList.add("Row " + rowNum + " rejected: Used Beds is not numeric.");
+                    continue;
+                } else if (Math.round(uBCell.getNumericCellValue()) != uBCell.getNumericCellValue()) {
+                    errorList.add("Row " + rowNum + " rejected: Used Beds is not an integer.");
+                    continue;
+                } else if (uBCell.getNumericCellValue() < 0) {
+                    errorList.add("Row " + rowNum + " rejected: Used Beds must be greater than or equal to 0.");
+                    continue;
+                }
+
+                int usedRooms = (int) uRCell.getNumericCellValue();
+                int usedBeds = (int) uBCell.getNumericCellValue();
 
                 Occupancy newEntry = new Occupancy();
                 newEntry.setYear(year);
@@ -91,11 +179,7 @@ public class ImportWindow extends JFrame {
                 newEntry.setBeds(hotel.getNoBeds());
                 newEntry.setRooms(hotel.getNoRooms());
 
-                if (year <= 0) {
-                    errorList.add("Row " + rowNum + " rejected: Year must be greater than 0.");
-                } else if (month < 1 || month > 12) {
-                    errorList.add("Row " + rowNum + " rejected: Month must be between 1 and 12.");
-                } else if (newEntry.getUsedRooms() <= newEntry.getRooms() && newEntry.getUsedBeds() <= newEntry.getBeds()) {
+                if (newEntry.getUsedRooms() <= newEntry.getRooms() && newEntry.getUsedBeds() <= newEntry.getBeds()) {
                     occupancyList.add(newEntry);
                 } else {
                     errorList.add("Row " + rowNum + " rejected: Used capacity exceeds hotel maximums.");

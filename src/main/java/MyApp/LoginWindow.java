@@ -22,7 +22,7 @@ public class LoginWindow extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JButton button = new JButton("Login");
+        JButton loginButton = new JButton("Login");
         JTextField usernameField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
 
@@ -36,9 +36,9 @@ public class LoginWindow extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         add(panel, BorderLayout.CENTER);
-        add(button, BorderLayout.SOUTH);
+        add(loginButton, BorderLayout.SOUTH);
 
-        button.addActionListener(e -> {
+        loginButton.addActionListener(e -> {
             String username = usernameField.getText().trim();
             String password = new String(passwordField.getPassword());
 
@@ -105,5 +105,6 @@ public class LoginWindow extends JFrame {
                 );
             }
         });
+        getRootPane().setDefaultButton(loginButton);
     }
 }

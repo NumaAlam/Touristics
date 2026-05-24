@@ -1,10 +1,16 @@
 package US10;
 
+import database.HibernateUtil;
+import hotels.Hotel;
+import occupancies.Occupancy;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.*;
 import java.time.Year;
+import java.util.List;
 
 /**
  * US10 – Shows all transactional data for a selected hotel with optional
@@ -23,10 +29,6 @@ public class TransactionListWindow extends JFrame {
 
     // Keeps hotel DB IDs in sync with the dropdown index so we can query by ID
     private final java.util.ArrayList<Integer> hotelIDs = new java.util.ArrayList<>();
-
-    private static final String DB_URL = "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;";
-    private static final String DB_USER = "dev";
-    private static final String DB_PASS = "dev";
 
     public TransactionListWindow(Integer hotelID) {
         this.hotelID = hotelID;
@@ -59,27 +61,25 @@ public class TransactionListWindow extends JFrame {
         model.addColumn("Beds");
         model.addColumn("Used Beds");
 
-        // Load all hotels from DB into dropdown; IDs are stored in parallel so we can map selection to DB ID
+        // Load hotels into dropdown via Hibernate; IDs are stored in parallel so we can map selection to DB ID
         hotelComboBox = new JComboBox<>();
         hotelIDs.clear();
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
-            PreparedStatement stmt;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            List<Hotel> hotels;
             if (hotelID == null) {
                 // Senior or other role with no hotel restriction — load all hotels
-                stmt = conn.prepareStatement("SELECT id, name FROM hotels ORDER BY name");
+                hotels = session.createQuery("from Hotel order by name", Hotel.class).list();
             } else {
                 // Hotel rep — restrict to their hotel
-                stmt = conn.prepareStatement("SELECT id, name FROM hotels WHERE id = ?");
-                stmt.setInt(1, hotelID);
+                Hotel h = session.get(Hotel.class, hotelID);
+                hotels = (h == null) ? List.of() : List.of(h);
             }
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                hotelComboBox.addItem(rs.getString("name"));
-                hotelIDs.add(rs.getInt("id"));
+            for (Hotel h : hotels) {
+                hotelComboBox.addItem(h.getName());
+                hotelIDs.add(h.getId());
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -134,7 +134,7 @@ public class TransactionListWindow extends JFrame {
         JPanel filterPanel = new JPanel();
 
         if (hotelID == null) {
-            // Senior sieht alles
+            // Senior sees everything
             filterPanel.add(new JLabel("Hotel:"));
             filterPanel.add(hotelComboBox);
             filterPanel.add(Box.createHorizontalStrut(20));
@@ -186,11 +186,10 @@ public class TransactionListWindow extends JFrame {
         int fromMonth = fromMonthComboBox.getSelectedIndex(); // 0 = All, 1 = Jan, ...
 
         int toYear = 0;
-        if (!toYearComboBox.getSelectedItem().equals("All")) {
+        if (!"All".equals(toYearComboBox.getSelectedItem())) {
             toYear = Integer.parseInt((String) toYearComboBox.getSelectedItem());
         }
         int toMonth = toMonthComboBox.getSelectedIndex(); // 0 = All, 1 = Jan, ...
-
 
         // Validate that FROM date is not after TO date to prevent empty or misleading results
         if (fromYear != 0 && toYear != 0) {
@@ -206,80 +205,54 @@ public class TransactionListWindow extends JFrame {
         fillTable(hotelId, fromYear, fromMonth, toYear, toMonth);
     }
 
-
-
-    // Builds SQL dynamically based on active filters; uses PreparedStatement to prevent SQL injection
+    // Builds HQL dynamically based on active filters; uses named parameters to prevent injection
     private void fillTable(int hotelId, int fromYear, int fromMonth, int toYear, int toMonth) {
         model.setRowCount(0);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
+        StringBuilder hql = new StringBuilder(
+                "from Occupancy o where o.hotel.id = :hotelId");
 
-            StringBuilder sql = new StringBuilder(
-                    "SELECT o.year, o.month, o.rooms, o.usedRooms, o.beds, o.usedBeds " +
-                            "FROM occupancies o " +
-                            "WHERE o.id = ?");
+        // FROM filter: (year > X OR (year = X AND month >= Y)) handles cross-year ranges correctly
+        if (fromYear != 0 && fromMonth != 0) {
+            hql.append(" and (o.year > :fromYear or (o.year = :fromYear and o.month >= :fromMonth))");
+        } else if (fromYear != 0) {
+            hql.append(" and o.year >= :fromYear");
+        } else if (fromMonth != 0) {
+            hql.append(" and o.month >= :fromMonth");
+        }
 
-            // FROM filter: (year > X OR (year = X AND month >= Y)) handles cross-year ranges correctly
-            if (fromYear != 0 && fromMonth != 0) {
-                sql.append(" AND (o.year > ? OR (o.year = ? AND o.month >= ?))");
-            } else if (fromYear != 0) {
-                sql.append(" AND o.year >= ?");
-            } else if (fromMonth != 0) {
-                sql.append(" AND o.month >= ?");
-            }
+        // TO filter
+        if (toYear != 0 && toMonth != 0) {
+            hql.append(" and (o.year < :toYear or (o.year = :toYear and o.month <= :toMonth))");
+        } else if (toYear != 0) {
+            hql.append(" and o.year <= :toYear");
+        } else if (toMonth != 0) {
+            hql.append(" and o.month <= :toMonth");
+        }
 
-            // TO filter
-            if (toYear != 0 && toMonth != 0) {
-                sql.append(" AND (o.year < ? OR (o.year = ? AND o.month <= ?))");
-            } else if (toYear != 0) {
-                sql.append(" AND o.year <= ?");
-            } else if (toMonth != 0) {
-                sql.append(" AND o.month <= ?");
-            }
+        hql.append(" order by o.year desc, o.month desc");
 
-            sql.append(" ORDER BY o.year DESC, o.month DESC");
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Occupancy> query = session.createQuery(hql.toString(), Occupancy.class);
+            query.setParameter("hotelId", hotelId);
 
-            PreparedStatement ps = conn.prepareStatement(sql.toString());
+            if (fromYear != 0) query.setParameter("fromYear", fromYear);
+            if (fromMonth != 0) query.setParameter("fromMonth", fromMonth);
+            if (toYear != 0) query.setParameter("toYear", toYear);
+            if (toMonth != 0) query.setParameter("toMonth", toMonth);
 
-            int paramIndex = 1;
-            ps.setInt(paramIndex++, hotelId);
-
-            // FROM params
-            if (fromYear != 0 && fromMonth != 0) {
-                ps.setInt(paramIndex++, fromYear);
-                ps.setInt(paramIndex++, fromYear);
-                ps.setInt(paramIndex++, fromMonth);
-            } else if (fromYear != 0) {
-                ps.setInt(paramIndex++, fromYear);
-            } else if (fromMonth != 0) {
-                ps.setInt(paramIndex++, fromMonth);
-            }
-
-            // TO params
-            if (toYear != 0 && toMonth != 0) {
-                ps.setInt(paramIndex++, toYear);
-                ps.setInt(paramIndex++, toYear);
-                ps.setInt(paramIndex++, toMonth);
-            } else if (toYear != 0) {
-                ps.setInt(paramIndex++, toYear);
-            } else if (toMonth != 0) {
-                ps.setInt(paramIndex++, toMonth);
-            }
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
+            List<Occupancy> results = query.getResultList();
+            for (Occupancy o : results) {
                 model.addRow(new Object[]{
-                        rs.getInt("year"),
-                        getMonthName(rs.getInt("month")),
-                        rs.getInt("rooms"),
-                        rs.getInt("usedRooms"),
-                        rs.getInt("beds"),
-                        rs.getInt("usedBeds")
+                        o.getYear(),
+                        getMonthName(o.getMonth()),
+                        o.getRooms(),
+                        o.getUsedRooms(),
+                        o.getBeds(),
+                        o.getUsedBeds()
                 });
             }
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }

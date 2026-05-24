@@ -215,23 +215,34 @@ public class HotelEditWindow extends JFrame {
                 saveHotelData();
             }
         });
-    }private void addDeleteButtonFunction(JButton deleteButton) {
+    }
+    private void addDeleteButtonFunction(JButton deleteButton) {
         deleteButton.addActionListener(e -> {
+            // Load impact so the user sees exactly what will be deleted before confirming.
+            US11.HotelDeletionService.HotelImpact impact =
+                    US11.HotelDeletionService.loadImpact(hotelId);
+
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Delete this hotel?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    String.format(
+                            "Delete this hotel?%n" +
+                                    "This will also delete %d linked transactional data record(s)%n" +
+                                    "and unlink %d user(s) assigned to this hotel.",
+                            impact.linkedOccupancies, impact.linkedUsers),
+                    "Confirm",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
             if (confirm != JOptionPane.YES_OPTION) return;
 
-            Transaction tx = null;
-            try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
-                tx = session.beginTransaction();
-                Hotel hotel = session.get(Hotel.class, hotelId);
-                session.remove(hotel);
-                tx.commit();
+            // Delegate the cascade delete to the shared US11 service so FK
+            // constraints on occupancies and users are handled correctly.
+            US11.HotelDeletionService.DeletionResult result =
+                    US11.HotelDeletionService.deleteHotelWithCascade(hotelId);
+
+            if (result.success) {
                 JOptionPane.showMessageDialog(this, "Hotel deleted successfully.");
                 dispose();
-            } catch (Exception ex) {
-                if (tx != null) tx.rollback();
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: " + result.errorMessage);
             }
         });
     }

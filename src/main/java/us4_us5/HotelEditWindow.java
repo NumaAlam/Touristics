@@ -4,6 +4,7 @@ import database.HibernateUtil;
 import hotels.Hotel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import users.User;
 
 import javax.swing.*; // Swing components used for the graphical user interface, such as JFrame, JTextField, JButton, JPanel and JOptionPane.
 import java.awt.*; // AWT layout classes, especially BorderLayout and GridLayout, used to arrange the edit form.
@@ -224,6 +225,12 @@ public class HotelEditWindow extends JFrame {
             Transaction tx = null;
             try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
                 tx = session.beginTransaction();
+                User user = session.createQuery("from User where hotelID = :id", User.class)
+                        .setParameter("id", hotelId)
+                        .uniqueResult();
+                if (user != null) {
+                    session.remove(user);
+                }
                 Hotel hotel = session.get(Hotel.class, hotelId);
                 session.remove(hotel);
                 tx.commit();

@@ -20,7 +20,7 @@ public class Menu extends JFrame {
     JMenuItem userManagementMenuItem = new JMenuItem("User Management");
 
     JMenuItem hotelOverviewMenuItem = new JMenuItem("Hotel Overview");
-
+    JMenuItem deleteHotelMenuItem = new JMenuItem("Delete Hotel");
     JMenuItem transactionListMenuItem = new JMenuItem("Transaction List per Hotel");
 
     JMenuItem importTransactionMenuItem = new JMenuItem("Import Transactions");
@@ -34,6 +34,7 @@ public class Menu extends JFrame {
         menu.add(occupancyMenuItem);
         menu.add(addHotelMenuItem);
         menu.add(hotelOverviewMenuItem);
+        menu.add(deleteHotelMenuItem);
         menu.add(transactionListMenuItem);
         menu.add(exitMenuItem);
         menu.add(userManagementMenuItem);
@@ -60,6 +61,10 @@ public class Menu extends JFrame {
 
         hotelOverviewMenuItem.addActionListener(e -> {
             new us4_us5.HotelOverviewWindow().setVisible(true);
+        });
+
+        deleteHotelMenuItem.addActionListener(e -> {
+            new US11.DeleteHotelWindow().setVisible(true);
         });
 
         userManagementMenuItem.addActionListener(e -> {

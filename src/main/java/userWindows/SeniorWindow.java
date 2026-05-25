@@ -13,7 +13,7 @@ public class SeniorWindow extends JFrame {
     public SeniorWindow(String text) {
 
         setTitle(text);
-        setSize(300, 200);
+        setSize(350, 250);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 

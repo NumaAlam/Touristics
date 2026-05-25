@@ -17,7 +17,7 @@ public class LoginWindow extends JFrame {
 
     public LoginWindow() {
         setTitle("Login");
-        setSize(300, 150);
+        setSize(400, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

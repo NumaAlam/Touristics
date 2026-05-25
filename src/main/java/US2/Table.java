@@ -116,7 +116,7 @@ public class Table extends JFrame {
         hotelIDComboBox.addItem(allOption);
         try (Session session = HibernateUtil.getSessionFactory().openSession();) {
             List<Hotel> hotels = session
-                    .createQuery("from Hotel", Hotel.class)
+                    .createQuery("from Hotel order by name asc", Hotel.class)
                     .list();
             for (Hotel hotel : hotels) {
                 hotelIDComboBox.addItem(hotel);
@@ -185,7 +185,6 @@ public class Table extends JFrame {
                 hql.append(" AND o.month = :month");
             }
 
-            hql.append("ORDER BY name ASC");
             // Create the query and set the parameters
             TypedQuery<Occupancy> query = session.createQuery(hql.toString(), Occupancy.class);
             if (hotelId != -1) {

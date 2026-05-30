@@ -1,8 +1,14 @@
 package MyApp;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
+import javax.swing.*;
+
 public class AppStart {
-    static void main() {
-        LoginWindow loginWindow = new LoginWindow();
-        loginWindow.setVisible(true);   
+    public static void main(String[] args) {
+        FlatLightLaf.setup();
+        SwingUtilities.invokeLater(() -> {
+            new LoginWindow().setVisible(true);
+        });
     }
 }

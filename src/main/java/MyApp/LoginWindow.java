@@ -2,7 +2,6 @@ package MyApp;
 
 import database.HibernateUtil;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.mindrot.jbcrypt.BCrypt;
 import userWindows.HeadWindow;
 import userWindows.HotelRepWindow;
@@ -11,32 +10,35 @@ import userWindows.SeniorWindow;
 import users.User;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class LoginWindow extends JFrame {
-
     public LoginWindow() {
-        setTitle("Login");
-        setSize(400, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setTitle("Lower Austria tourist portal - Login");
         setLayout(new BorderLayout());
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(scaled));
+        add(logoLabel, BorderLayout.NORTH);
 
-        JButton loginButton = new JButton("Login");
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 20));
+        panel.setBorder(new EmptyBorder(15,15,15,15));
+        JLabel usernameLabel = new JLabel("Username:");
+        panel.add(usernameLabel);
         JTextField usernameField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
-
-        panel.add(new JLabel("Username:"));
         panel.add(usernameField);
-        panel.add(new JLabel("Password:"));
+        JLabel passwordLabel = new JLabel("Password:");
+        panel.add(passwordLabel);
+        JPasswordField passwordField = new JPasswordField();
         panel.add(passwordField);
-
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
         add(panel, BorderLayout.CENTER);
-        add(loginButton, BorderLayout.SOUTH);
+
+        JPanel southPanel = new JPanel();
+        southPanel.setBorder(new EmptyBorder(0,20,20,20));
+        JButton loginButton = new JButton("Login");
+        southPanel.add(loginButton);
+        add(southPanel, BorderLayout.SOUTH);
 
         loginButton.addActionListener(e -> {
             String username = usernameField.getText().trim();
@@ -47,7 +49,7 @@ public class LoginWindow extends JFrame {
                 return;
             }
 
-            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
                 User user = session
                         .createQuery("from User where username = :username", User.class)
                         .setParameter("username", username)
@@ -106,5 +108,7 @@ public class LoginWindow extends JFrame {
             }
         });
         getRootPane().setDefaultButton(loginButton);
+        pack();
+        setLocationRelativeTo(null);
     }
 }

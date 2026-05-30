@@ -1,7 +1,6 @@
 package us4_us5;
 
 import database.HibernateUtil;
-import MyApp.Menu; // Needed to return from the hotel overview window back to the main menu.
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 

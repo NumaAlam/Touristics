@@ -1,5 +1,6 @@
 package US1;
 
+import MyApp.TableStyler;
 import database.HibernateUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -22,11 +23,19 @@ public class Table extends JFrame {
         fillTable();        // import data from SQL DBS
         addComponents();
         backButton();
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
     // puts the table in a scroll pane and centers it
     private void addComponents() {
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        add(new JLabel(new ImageIcon(scaled), SwingConstants.CENTER), BorderLayout.NORTH);
+
         JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(600, 150));
         add(scrollPane, BorderLayout.CENTER);
     }
 
@@ -34,7 +43,6 @@ public class Table extends JFrame {
     private void backButton() {
         JButton backButton = new JButton("Close Table");
         backButton.setPreferredSize(new Dimension(100, 50));
-        backButton.setBackground(new Color(175, 175, 255));
         add(backButton, BorderLayout.SOUTH);
         backButton.addActionListener(e -> {
             dispose();
@@ -87,6 +95,7 @@ public class Table extends JFrame {
     // Initializes the table and its components
     private void initComponents() {
         table = new JTable();
+        TableStyler.styleTable(table);
         model = new DefaultTableModel();
         table.setDefaultEditor(Object.class, null); // Deactivates cell editing
         table.setModel(model);
@@ -94,10 +103,7 @@ public class Table extends JFrame {
 
     // Defines the frame settings
     private void defineFrame() {
-        setSize(520, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("Current Hotel Capacity. Date - " + java.time.LocalDate.now());
-        setLocationRelativeTo(null);
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximizes the window
+        setTitle("Lower Austria Tourist Portal — Master Data Summary");
     }
 }

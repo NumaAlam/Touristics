@@ -1,6 +1,7 @@
 package US10;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
@@ -36,13 +37,14 @@ public class TransactionListWindow extends JFrame {
         addComponents();
         addActions();
         backButton();
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
     private void defineFrame() {
-        setTitle("Transactional Data per Hotel");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setTitle("Lower Austria Tourist Portal — Transaction List");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
     }
 
@@ -132,6 +134,7 @@ public class TransactionListWindow extends JFrame {
     private void addComponents() {
         // --- Filter panel ---
         JPanel filterPanel = new JPanel();
+        filterPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         if (hotelID == null) {
             // Senior sieht alles
@@ -149,7 +152,12 @@ public class TransactionListWindow extends JFrame {
             filterPanel.add(toMonthComboBox);
         }
 
-        add(filterPanel, BorderLayout.NORTH);
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(new JLabel(new ImageIcon(scaled), SwingConstants.CENTER), BorderLayout.NORTH);
+        topPanel.add(filterPanel, BorderLayout.CENTER);
+        add(topPanel, BorderLayout.NORTH);
 
         // --- Table ---
         JScrollPane scrollPane = new JScrollPane(table);

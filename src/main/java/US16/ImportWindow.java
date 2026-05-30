@@ -9,6 +9,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
@@ -29,6 +30,8 @@ public class ImportWindow extends JFrame {
         defineButtons();
         addComponents();
 
+        pack();
+        setLocationRelativeTo(null);
     }
 
     private void defineButtons() {
@@ -222,9 +225,17 @@ public class ImportWindow extends JFrame {
     }
 
     private void addComponents() {
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        add(new JLabel(new ImageIcon(scaled)), BorderLayout.NORTH);
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        centerPanel.add(new JLabel("Select hotel: "), BorderLayout.NORTH);
+        centerPanel.add(hotelComboBox, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
+
         add(buttonPanel, BorderLayout.SOUTH);
-        add(new JLabel("Select hotel: "), BorderLayout.NORTH);
-        add(hotelComboBox, BorderLayout.CENTER);
     }
 
     private void initComponents() {
@@ -245,9 +256,8 @@ public class ImportWindow extends JFrame {
     }
 
     private void defineFrame() {
-        setTitle("Import Data");
-        setSize(400, 200);
+        setTitle("Lower Austria Tourist Portal — Import Transactions");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
     }
 }

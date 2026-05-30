@@ -18,32 +18,35 @@ public class HotelRepWindow extends JFrame {
         this.hotelID = hotelID;
         this.hotelName = loadHotelName(hotelID);
 
-        setTitle("NOE-TO Hotel Representative Portal");
-        setSize(600, 400);
+        setTitle("Lower Austria Tourist Portal — Hotel Representative Portal");
+        initializeUI();
+        pack();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        initializeUI();
+
     }
 
     private void initializeUI() {
+        setLayout(new BorderLayout());
+
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(scaled));
+        add(logoLabel, BorderLayout.NORTH);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
         // ===== HEADER =====
-        JLabel titleLabel = new JLabel("Hotel Representative Menu", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
-
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        setTitle("NOE-TO Hotel Representative Portal");
 
         // ===== CENTER =====
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new GridLayout(5, 1, 15, 15));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
 
-        JLabel hotelInfo = new JLabel("Assigned Hotel ID: " + hotelID, SwingConstants.CENTER);
+        JLabel hotelInfo = new JLabel("Assigned Hotel: " + hotelName, SwingConstants.CENTER);
         hotelInfo.setFont(new Font("Arial", Font.PLAIN, 16));
 
         JButton viewHotelDataButton = new JButton("View My Hotel Data");
@@ -111,7 +114,7 @@ public class HotelRepWindow extends JFrame {
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        add(mainPanel);
+        add(mainPanel, BorderLayout.CENTER);
     }
 
     private String loadHotelName(int hotelID) {

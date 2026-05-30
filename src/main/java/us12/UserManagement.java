@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -21,13 +22,14 @@ public class UserManagement extends JFrame {
         fillTable();
         addComponents();
         addButtonPanel();
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
     private void defineFrame (){
-         setTitle("Hotel Management System");
-         setSize(600,400);
-         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         setLocationRelativeTo(null);
+        setTitle("Lower Austria Tourist Portal — User Management");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
          setLayout(new BorderLayout());
     }
 
@@ -69,18 +71,23 @@ public class UserManagement extends JFrame {
     }
 
     private void addComponents() {
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        add(new JLabel(new ImageIcon(scaled)), BorderLayout.NORTH);
+
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
     }
 
     private void addButtonPanel() {
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JButton addButton = new JButton("Add User");
         JButton editButton = new JButton("Edit selected User");
         JButton deleteButton = new JButton("Delete selected User");
         JButton refreshButton = new JButton("Refresh");
-        JButton backButton = new JButton("Back to Menu");
+        JButton backButton = new JButton("Back");
 
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);

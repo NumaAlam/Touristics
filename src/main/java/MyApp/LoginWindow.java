@@ -15,7 +15,7 @@ import java.awt.*;
 
 public class LoginWindow extends JFrame {
     public LoginWindow() {
-        setTitle("Lower Austria tourist portal - Login");
+        setTitle("Lower Austria Tourist Portal — Login");
         setLayout(new BorderLayout());
         ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
         Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);

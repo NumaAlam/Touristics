@@ -64,7 +64,7 @@ public class HotelEditWindow extends JFrame {
     }
 
     private void defineFrame() {
-        setTitle("Edit Hotel"); // Sets title of the edit window.
+        setTitle("Lower Austria Tourist Portal — Edit Hotel"); // Sets title of the edit window.
         setSize(500, 500); // Sets window size for the full master data form.
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Only closes this edit window, not the whole application.
         setLocationRelativeTo(null); // Centers the window on the screen.

@@ -34,6 +34,8 @@ public class HotelOverviewWindow extends JFrame {
         addComponents(); // Adds the table to the window.
         addButtonPanel(); // Adds the buttons below the table.
 
+        pack();
+        setLocationRelativeTo(null);
     }
 
     private void addFilterPanel() {
@@ -55,7 +57,12 @@ public class HotelOverviewWindow extends JFrame {
 
         filterPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        add(filterPanel, BorderLayout.NORTH);
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(new JLabel(new ImageIcon(scaled)), BorderLayout.NORTH);
+        topPanel.add(filterPanel, BorderLayout.CENTER);
+        add(topPanel, BorderLayout.NORTH);
 
         filterButton.addActionListener(e -> refreshTable());
 
@@ -67,10 +74,8 @@ public class HotelOverviewWindow extends JFrame {
     }
 
     private void defineFrame() {
-        setTitle("Hotel Overview"); // Sets the title displayed in the window header.
-        setSize(1100, 500); // Sets the window size large enough to display the hotel overview table.
+        setTitle("Lower Austria Tourist Portal — Hotel Overview"); // Sets the title displayed in the window header.
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null); // Centers the window on the screen.
         setLayout(new BorderLayout());  // Uses BorderLayout so the table can be placed in the center and buttons at the bottom.
     }
 
@@ -192,6 +197,7 @@ public class HotelOverviewWindow extends JFrame {
 
     private void addComponents() {
         JScrollPane scrollPane = new JScrollPane(table); // Wraps the table inside a scroll pane so the user can scroll through all hotels.
+        scrollPane.setPreferredSize(new Dimension(600, 150));
         add(scrollPane, BorderLayout.CENTER);  // Adds the scrollable table to the center of the frame.
     }
 

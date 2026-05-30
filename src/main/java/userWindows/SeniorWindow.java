@@ -15,8 +15,7 @@
 
 
         public SeniorWindow(String text) {
-            setTitle(text);
-
+            setTitle("Lower Austria Tourist Portal — " + text);
             setLayout(new BorderLayout());
             ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
             Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);

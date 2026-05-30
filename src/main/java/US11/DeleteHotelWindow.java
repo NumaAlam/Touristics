@@ -55,6 +55,9 @@ public class DeleteHotelWindow extends JFrame {
         addComponents();
         addActions();
         fillTable();
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
     private boolean isDeleteAllowed() {
@@ -64,10 +67,8 @@ public class DeleteHotelWindow extends JFrame {
     }
 
     private void defineFrame() {
-        setTitle("Delete Hotel and linked Transactional Data");
-        setSize(1200, 550);
+        setTitle("Lower Austria Tourist Portal — Delete Hotel");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
     }
 
@@ -108,6 +109,12 @@ public class DeleteHotelWindow extends JFrame {
         JPanel filterPanel = new JPanel(new GridLayout(2, 4, 5, 5));
         filterPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(new JLabel(new ImageIcon(scaled)), BorderLayout.NORTH);
+        topPanel.add(filterPanel, BorderLayout.CENTER);
+
         filterPanel.add(new JLabel("Search name:"));
         filterPanel.add(nameFilterField);
         filterPanel.add(new JLabel("Category:"));
@@ -118,7 +125,7 @@ public class DeleteHotelWindow extends JFrame {
         filterPanel.add(new JLabel("")); // spacer to keep the grid aligned
         filterPanel.add(clearFilterButton);
 
-        add(filterPanel, BorderLayout.NORTH);
+        add(topPanel, BorderLayout.NORTH);
 
         // --- Table (CENTER) ---
         JScrollPane scrollPane = new JScrollPane(table);

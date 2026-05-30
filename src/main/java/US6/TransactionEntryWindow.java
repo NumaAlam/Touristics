@@ -45,13 +45,14 @@ public class TransactionEntryWindow extends JFrame {
         initFields();
         addComponents();
         loadHotelCapacity();
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
     private void defineFrame() {
-        setTitle("Transactional Data Entry");
-        setSize(450, 400);
+        setTitle("Lower Austria Tourist Portal — Transaction Entry");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
     }
 
@@ -80,6 +81,10 @@ public class TransactionEntryWindow extends JFrame {
     }
 
     private void addComponents() {
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        add(new JLabel(new ImageIcon(scaled)), BorderLayout.NORTH);
+
         JPanel transactionPanel = new JPanel(new GridLayout(8, 2, 10, 10));
 
         transactionPanel.add(new JLabel("Hotel ID:"));

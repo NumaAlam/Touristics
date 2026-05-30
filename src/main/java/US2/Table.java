@@ -8,6 +8,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
@@ -45,6 +46,9 @@ public class Table extends JFrame {
         fillTable_Hibernate(-1, null, 0, 0);  // import data from SQL DBS
         addComponents();
         backButton();
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
     // filter actions
@@ -139,9 +143,9 @@ public class Table extends JFrame {
 
     // adds the table and the filter panel to the frame
     private void addComponents() {
-        JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, BorderLayout.CENTER);
-        add(panel, BorderLayout.NORTH); // Filter-Panel oben
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+
         panel.add(new JLabel("Category:"));
         panel.add(categoryComboBox);
         panel.add(new JLabel("Year:"));
@@ -150,6 +154,15 @@ public class Table extends JFrame {
         panel.add(monthComboBox);
         panel.add(new JLabel("Hotel name:"));
         panel.add(hotelIDComboBox);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(new JLabel(new ImageIcon(scaled), SwingConstants.CENTER), BorderLayout.NORTH);
+        topPanel.add(panel, BorderLayout.CENTER);
+        add(topPanel, BorderLayout.NORTH);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     // back button to close the table
@@ -222,9 +235,8 @@ public class Table extends JFrame {
     }
 
     private void defineFrame() {
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // Fenster maximiert starten
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle(YearMonth.from(LocalDate.now()) + " (final results)");
+        setTitle("Lower Austria Tourist Portal — Transactional Data");
     }
 
     private void updateTable() {

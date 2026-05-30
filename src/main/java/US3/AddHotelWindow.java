@@ -8,6 +8,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import users.User;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 
@@ -28,20 +29,24 @@ public class AddHotelWindow extends JFrame {
 
     /**
      * Constructs and displays the Add Hotel window.
-     * Builds the form layout with 10 labelled input fields and a save button.
+     * Builds the form layout with 10 labeled input fields and a save button.
      * The save action validates input, persists the Hotel entity via Hibernate,
      * and closes the window on success.
      */
     public AddHotelWindow() {
 
-        setTitle("Add Hotel");
+        setTitle("Lower Austria Tourist Portal — Add Hotel");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(400, 400);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        ImageIcon logo = new ImageIcon(getClass().getResource("/2026-LATP_Logo.jpg"));
+        Image scaled = logo.getImage().getScaledInstance(480, 120, Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(scaled));
+        add(logoLabel, BorderLayout.NORTH);
 
 
         JPanel panel = new JPanel(new GridLayout(11, 2, 10, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
 
         JComboBox<String> categoryField = new JComboBox<>(new String[]{"*****", "****", "***", "**", "*"});
@@ -82,6 +87,11 @@ public class AddHotelWindow extends JFrame {
        JButton saveButton = new JButton("Save");
        add(saveButton, BorderLayout.SOUTH);
 
+        pack();
+        setLocationRelativeTo(null);
+
+
+
         // Save handler: validates all fields, rejects blank or non-positive numeric input,
         // then performs an INSERT into the hotels table via PreparedStatement.
         // Errors are surfaced to the user through JOptionPane dialogs
@@ -100,7 +110,7 @@ public class AddHotelWindow extends JFrame {
 
            if (HotelValidator.isAnyFieldBlank(category, name, owner, contact, address,
                    city, citycode, phone, noRoom, noBed)) {
-               JOptionPane.showMessageDialog(null, "Bitte alle Felder ausfüllen!");
+               JOptionPane.showMessageDialog(null, "Please fill in all fields!");
                return;
            }
 
@@ -161,18 +171,6 @@ public class AddHotelWindow extends JFrame {
                if (tx != null) tx.rollback();
                JOptionPane.showMessageDialog(null, "Datenbank-Fehler: " + ex.getMessage());
            }
-
-
-           System.out.println("Category: " + category);
-           System.out.println("Name: " + name);
-           System.out.println("Owner: " + owner);
-           System.out.println("Contact: " + contact);
-           System.out.println("Address: " + address);
-           System.out.println("City: " + city);
-           System.out.println("CityCode: " + citycode);
-           System.out.println("Phone: " + phone);
-           System.out.println("NoRoom: " + noRoom);
-           System.out.println("NoBed: " + noBed);
 
        });
 

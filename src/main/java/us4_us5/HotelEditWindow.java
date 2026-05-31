@@ -293,12 +293,34 @@ public class HotelEditWindow extends JFrame {
                 || cityCodeField.getText().trim().isEmpty()
                 || phoneField.getText().trim().isEmpty()) {
 
+
             JOptionPane.showMessageDialog(
                     this,
                     "Please fill in all required fields.",
                     "Missing input",
                     JOptionPane.WARNING_MESSAGE
             );
+            return;
+        }
+        try {
+            int phone = Integer.parseInt(phoneField.getText().trim());
+            if (phone <= 0) {
+                JOptionPane.showMessageDialog(this, "Phone must be a positive number.", "Invalid input", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Phone must be a valid number.", "Invalid input", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            int cityCode = Integer.parseInt(cityCodeField.getText().trim());
+            if (cityCode <= 0) {
+                JOptionPane.showMessageDialog(this, "City code must be a positive number.", "Invalid input", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "City code must be a valid number.", "Invalid input", JOptionPane.WARNING_MESSAGE);
             return;
         }
 

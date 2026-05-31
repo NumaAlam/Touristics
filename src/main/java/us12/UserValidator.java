@@ -2,7 +2,7 @@ package us12;
 
 public class UserValidator {
     public static boolean isUsernameValid(String username) {
-        return username != null && !username.isBlank();
+        return username != null && !username.isBlank() && username.trim().length() >= 3;
     }
 
     public static boolean isPasswordValid(String password) {

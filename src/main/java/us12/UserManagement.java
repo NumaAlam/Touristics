@@ -104,6 +104,27 @@ public class UserManagement extends JFrame {
         backButton.addActionListener(e -> dispose());
     }
 
+    private boolean usernameExists(String username, Integer excludeUserId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            String hql = excludeUserId != null
+                    ? "SELECT COUNT(u) FROM User u WHERE u.username = :username AND u.id != :excludeId"
+                    : "SELECT COUNT(u) FROM User u WHERE u.username = :username";
+            var query = session.createQuery(hql, Long.class).setParameter("username", username);
+            if (excludeUserId != null) query.setParameter("excludeId", excludeUserId);
+            Long count = query.uniqueResult();
+            return count != null && count > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+
+
+
+
+
+
     // ── ADD ──────────────────────────────────────────────────────────────────
 
     private void addAddButtonFunction(JButton addButton) {
@@ -111,6 +132,10 @@ public class UserManagement extends JFrame {
             // Collect input via dialogs
             String username = JOptionPane.showInputDialog(this, "Username:");
             if (!UserValidator.isUsernameValid(username)) return;
+            if (usernameExists(username.trim(), null)) {
+                JOptionPane.showMessageDialog(this, "Username already exists.", "Duplicate", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             String password = JOptionPane.showInputDialog(this, "Password:");
             if (!UserValidator.isPasswordValid(password)) return;
 
@@ -158,6 +183,10 @@ public class UserManagement extends JFrame {
             String currentUsername = (String) model.getValueAt(selectedRow, 1);
             String newUsername = JOptionPane.showInputDialog(this, "New Username:", currentUsername);
             if (!UserValidator.isUsernameValid(newUsername)) return;
+            if (!newUsername.trim().equals(currentUsername) && usernameExists(newUsername.trim(), userId)) {
+                JOptionPane.showMessageDialog(this, "Username already exists.", "Duplicate", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             // Allow changing the role
             String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
             String newRole = (String) JOptionPane.showInputDialog(this,

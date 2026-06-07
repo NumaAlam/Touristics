@@ -45,7 +45,7 @@ public class AddHotelWindow extends JFrame {
         add(logoLabel, BorderLayout.NORTH);
 
 
-        JPanel panel = new JPanel(new GridLayout(11, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(12, 2, 10, 10));
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
 
@@ -59,6 +59,16 @@ public class AddHotelWindow extends JFrame {
         JTextField phoneField = new JTextField();
         JTextField noRoomField = new JTextField();
         JTextField noBedField = new JTextField();
+
+        //US30 Checkbox Text
+        JCheckBox gdprConfirmationCheckBox = new JCheckBox(
+                "<html>Please review the entered hotel data carefully before saving. " +
+                        "By confirming, you declare that the information is correct, " +
+                        "that you are authorized to submit or change this data for your assigned hotel, " +
+                        "and that the data may be processed for the purposes of the NOE-TO tourism portal.</html>"
+        );
+        //US 30 Button only visible for Hotel Representative
+        gdprConfirmationCheckBox.setVisible("Hotel Representative".equals(MyApp.Session.currentRole));
 
 
         panel.add(new JLabel("Category"));
@@ -81,6 +91,10 @@ public class AddHotelWindow extends JFrame {
         panel.add(noRoomField);
         panel.add(new JLabel("NoBed"));
         panel.add(noBedField);
+
+        // US30: Displays the confirmation checkbox when a hotel representative adds hotel data.
+        panel.add(new JLabel("Confirmation"));
+        panel.add(gdprConfirmationCheckBox);
 
         add(panel, BorderLayout.CENTER);
         //Save Button
@@ -107,6 +121,19 @@ public class AddHotelWindow extends JFrame {
            String phone = phoneField.getText();
            String noRoom = noRoomField.getText();
            String noBed = noBedField.getText();
+
+           // US30: Prevents hotel representatives from submitting hotel data without explicit GDPR confirmation.
+           if ("Hotel Representative".equals(MyApp.Session.currentRole)
+                   && !gdprConfirmationCheckBox.isSelected()) {
+
+               JOptionPane.showMessageDialog(
+                       null,
+                       "Please confirm the correctness and authorization statement before saving.",
+                       "Confirmation required",
+                       JOptionPane.WARNING_MESSAGE
+               );
+               return;
+           }
 
            if (HotelValidator.isAnyFieldBlank(category, name, owner, contact, address,
                    city, citycode, phone, noRoom, noBed)) {

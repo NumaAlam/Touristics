@@ -27,6 +27,7 @@ public class HotelEditWindow extends JFrame {
     private JTextField phoneField;
     private JTextField noRoomsField;
     private JTextField noBedsField;
+    private JCheckBox gdprConfirmationCheckBox; //US30 Checkbox for GDPR
 
     public HotelEditWindow(int hotelId) {
         this.hotelId = hotelId; // Saves selected hotel ID for loading and updating the correct database record.
@@ -85,6 +86,13 @@ public class HotelEditWindow extends JFrame {
         noRoomsField = new JTextField();
         noBedsField = new JTextField();
 
+        //US30 Text for Checkbox
+        gdprConfirmationCheckBox = new JCheckBox(
+                "I confirm that I am authorized to submit or change this hotel data."
+        );
+        //US30 only visible for Hotel Representatives
+        gdprConfirmationCheckBox.setVisible("Hotel Representative".equals(MyApp.Session.currentRole));
+
         idField.setEditable(false); // The hotel ID is automatically assigned and must not be edited by the user.
     }
 
@@ -126,6 +134,10 @@ public class HotelEditWindow extends JFrame {
 
         formPanel.add(new JLabel("Number of Beds:"));
         formPanel.add(noBedsField);
+
+        //US30
+        formPanel.add(new JLabel("Confirmation:"));
+        formPanel.add(gdprConfirmationCheckBox);
 
         // Adds padding around the form so the fields do not touch the window border.
         formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -205,13 +217,29 @@ public class HotelEditWindow extends JFrame {
     private void addSaveButtonFunction(JButton saveButton) {
         saveButton.addActionListener(e -> {
             // Makes it so changes are only saved after explicit confirmation.
+            String confirmationMessage;
+
+            if ("Hotel Representative".equals(MyApp.Session.currentRole)) {
+                confirmationMessage = """
+                    Please review the entered hotel data carefully before saving.
+
+                    By confirming, you declare that the information is correct,
+                    that you are authorized to submit or change this data for your assigned hotel,
+                    and that the data may be processed for the purposes of the NOE-TO tourism portal.
+
+                    Do you want to save the changes?
+                    """;
+            } else {
+                confirmationMessage = "Do you really want to save the changes?";
+            }
+
             int answer = JOptionPane.showConfirmDialog(
                     this,
-                    "Do you really want to save the changes?",
+                    confirmationMessage,
                     "Confirm changes",
                     JOptionPane.YES_NO_OPTION
             );
-            // Only save data if the user confirms the action.
+
             if (answer == JOptionPane.YES_OPTION) {
                 saveHotelData();
             }
@@ -244,6 +272,20 @@ public class HotelEditWindow extends JFrame {
     }
 
     private void saveHotelData() {
+
+        // US30: Hotel representatives must explicitly confirm the GDPR/correctness statement before saving.
+        if ("Hotel Representative".equals(MyApp.Session.currentRole)
+                && !gdprConfirmationCheckBox.isSelected()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please confirm the correctness and authorization statement before saving.",
+                    "Confirmation required",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
         // US25: Prevents hotel representatives from saving changes to hotels
         // that are not assigned to their user account.
         if (!isHotelAccessAllowed()) {

@@ -1,1 +1,81 @@
-This txt document will be where the User Manual is eventually placed
+========================================
+ LOWER AUSTRIA TOURIST PORTAL — HELP
+ Quick Reference for Senior Users
+========================================
+
+For full step-by-step instructions, refer to the NOE-TO Internal User Manual.
+
+----------------------------------------
+HOTEL OVERVIEW
+----------------------------------------
+View all hotels in the system. Use the name or address filter fields to narrow
+the list, then click Apply Filter. Click Clear Filter to reset. Select a row
+and click Edit to update a hotel's details.
+
+----------------------------------------
+ADD HOTEL
+----------------------------------------
+Create a new hotel master record. All fields are required: Category, Name,
+Owner, Contact, Address, City, CityCode, Phone, NoRoom, NoBed.
+NoRoom and NoBed must be positive integers. Click Save to confirm.
+
+----------------------------------------
+DELETE HOTEL
+----------------------------------------
+Permanently removes a hotel and all its linked occupancy records. Filter by
+name, category, or city to locate the hotel, select it, then click Delete.
+A confirmation dialog shows the impact before you confirm.
+Requires the "Can Delete" permission on your account.
+NOTE: Deletion cannot be undone. Create a backup beforehand.
+
+----------------------------------------
+MASTER DATA SUMMARY
+----------------------------------------
+Read-only overview of all hotel master records. Use this for quick reference
+and reporting.
+
+----------------------------------------
+TRANSACTIONAL DATA
+----------------------------------------
+Read-only overview of all occupancy records across all hotels, showing Year,
+Month, Rooms, Used Rooms, Beds, and Used Beds.
+
+----------------------------------------
+TRANSACTION LIST PER HOTEL
+----------------------------------------
+Filter occupancy records by hotel and optional date range (From/To Year and
+Month). Use this to verify submitted data for a specific property.
+
+----------------------------------------
+IMPORT TRANSACTIONS
+----------------------------------------
+Bulk-load occupancy data from an Excel file (.xlsx only).
+Select the target hotel from the dropdown, click Import Excel, choose the file,
+and click Open. A result dialog reports how many records were imported and any
+errors. Duplicate records (same hotel/year/month) are skipped automatically.
+
+----------------------------------------
+USER MANAGEMENT
+----------------------------------------
+Create, edit, and delete system user accounts.
+Roles: Senior, Senior_Admin (not yet active), Hotel Representative, Head (not yet active).
+For Hotel Representatives, always assign a Hotel ID.
+Check "Can Delete" to grant hotel deletion rights to an account.
+
+----------------------------------------
+CREATE BACKUP
+----------------------------------------
+Exports all hotel and occupancy data to a file in the output/ directory.
+The button label changes to "Creating Backup..." while running — do not close
+the application until it completes.
+
+----------------------------------------
+LOGOUT
+----------------------------------------
+Ends your session and returns to the Login screen. Always log out before
+closing the application. Unsaved work is not preserved after logout.
+
+----------------------------------------
+For more detailed instructions, including troubleshooting and a full
+permissions reference, see the NOE-TO Internal User Manual.
+----------------------------------------

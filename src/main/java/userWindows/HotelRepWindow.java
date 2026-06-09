@@ -43,7 +43,7 @@ public class HotelRepWindow extends JFrame {
 
         // ===== CENTER =====
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(5, 1, 15, 15));
+        centerPanel.setLayout(new GridLayout(6, 1, 15, 15));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
 
         JLabel hotelInfo = new JLabel("Assigned Hotel: " + hotelName, SwingConstants.CENTER);
@@ -53,6 +53,8 @@ public class HotelRepWindow extends JFrame {
         JButton addTransactionButton = new JButton("Add Transaction Data");
         JButton viewTransactionsButton = new JButton("View Transaction Data");
         JButton logoutButton = new JButton("Logout");
+        JButton helpButton = new JButton("Help");
+
 
         // ===== BUTTON ACTIONS =====
 
@@ -111,6 +113,8 @@ public class HotelRepWindow extends JFrame {
         centerPanel.add(addTransactionButton);
         centerPanel.add(viewTransactionsButton);
         centerPanel.add(logoutButton);
+        centerPanel.add(helpButton);
+
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 

@@ -8,6 +8,8 @@ import us4_us5.HotelOverviewWindow;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class HotelRepWindow extends JFrame {
 
@@ -104,6 +106,15 @@ public class HotelRepWindow extends JFrame {
         logoutButton.addActionListener(e -> {
             dispose();
             new LoginWindow().setVisible(true);
+        });
+
+        helpButton.addActionListener(e -> {
+            try {
+                String helpInfo = Files.readString(Path.of("src/main/resources/help_hotelrep.txt"));
+                JOptionPane.showMessageDialog(this, helpInfo, "Help", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "help_hotelrep.txt konnte nicht geladen werden.");
+            }
         });
 
         // ===== ADD COMPONENTS =====

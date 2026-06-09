@@ -1,0 +1,47 @@
+========================================
+ LOWER AUSTRIA TOURIST PORTAL — HELP
+ Quick Reference for Hotel Representatives
+========================================
+
+For full step-by-step instructions, refer to the Tourist Company User Manual
+provided by your NOE-TO contact.
+
+----------------------------------------
+VIEW MY HOTEL DATA
+----------------------------------------
+Displays your hotel's master record (name, address, category, rooms, beds).
+To correct any details, select your hotel and click Edit. Review all fields,
+tick the Confirmation checkbox, then click Save and confirm with Yes.
+For changes you cannot make yourself, contact NOE-TO.
+
+----------------------------------------
+ADD TRANSACTION DATA
+----------------------------------------
+Enter your monthly occupancy figures. Select the year and month, then enter
+the number of Used Rooms and Used Beds for that period.
+Used Rooms and Used Beds cannot exceed your hotel's total Rooms and Beds.
+Each month can only have one record — duplicates will be rejected.
+Click Save to submit.
+
+----------------------------------------
+VIEW TRANSACTION DATA
+----------------------------------------
+Shows all occupancy records submitted for your hotel. Use the From/To Year
+and Month dropdowns to filter by date range.
+To correct an existing record, contact NOE-TO.
+
+----------------------------------------
+HELP
+----------------------------------------
+Displays this help text.
+
+----------------------------------------
+LOGOUT
+----------------------------------------
+Ends your session and returns to the Login screen. Always log out before
+closing the application.
+
+----------------------------------------
+For more detailed instructions, including a step-by-step guide and
+troubleshooting, see the Tourist Company User Manual.
+----------------------------------------

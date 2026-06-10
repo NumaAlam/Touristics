@@ -75,7 +75,14 @@
             helpButton.addActionListener(e -> {
                 try {
                     String helpInfo = Files.readString(Path.of("src/main/resources/help.txt"));
-                    JOptionPane.showMessageDialog(this, helpInfo, "Help", JOptionPane.INFORMATION_MESSAGE);
+                    JTextArea textArea = new JTextArea(helpInfo);
+                    textArea.setEditable(false);
+                    textArea.setLineWrap(true);
+                    textArea.setWrapStyleWord(true);
+                    textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+                    JScrollPane scrollPane = new JScrollPane(textArea);
+                    scrollPane.setPreferredSize(new Dimension(700, 500));
+                    JOptionPane.showMessageDialog(this, scrollPane, "Help", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "help.txt konnte nicht geladen werden.");
                 }

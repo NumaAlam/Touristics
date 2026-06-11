@@ -146,6 +146,11 @@ public class AddHotelWindow extends JFrame {
                return;
            }
 
+           if (!HotelValidator.isPositiveNumber(citycode) || !HotelValidator.isPositiveNumber(phone)) {
+               JOptionPane.showMessageDialog(null, "CityCode and Phone must be positive numbers!");
+               return;
+           }
+
            int noRoomAsNumber = Integer.parseInt(noRoom);
            int noBedAsNumber = Integer.parseInt(noBed);
 

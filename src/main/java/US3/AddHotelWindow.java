@@ -102,6 +102,7 @@ public class AddHotelWindow extends JFrame {
        add(saveButton, BorderLayout.SOUTH);
 
         pack();
+        setSize(600, 700);
         setLocationRelativeTo(null);
 
 

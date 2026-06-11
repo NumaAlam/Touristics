@@ -37,6 +37,7 @@ public class UserManagement extends JFrame {
         model = new DefaultTableModel();
         table = new JTable(model);
         table.setDefaultEditor(Object.class, null);
+        table.setAutoCreateRowSorter(true);
         model.addColumn("ID");
         model.addColumn("Username");
         model.addColumn("Role");
@@ -145,6 +146,12 @@ public class UserManagement extends JFrame {
                     JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
             if (role == null) return;
 
+            int confirm = JOptionPane.showConfirmDialog(this, "Create user " +username + " with role " + role + " ? ");
+            if(confirm != JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(this, "Vorgang abgebrochen");
+            return;
+            };
+
             Transaction tx = null;
             try (Session session = HibernateUtil.getSessionFactory().openSession()) {
                 tx = session.beginTransaction();
@@ -246,6 +253,11 @@ public class UserManagement extends JFrame {
             }
 
             int userId = (int) model.getValueAt(selectedRow, 0);
+            if(MyApp.Session.currentUserId !=null && userId == MyApp.Session.currentUserId){
+                JOptionPane.showMessageDialog(this, "Cannot delete your own Account",
+                        "not allowed", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             String username = (String) model.getValueAt(selectedRow, 1);
 
             int confirm = JOptionPane.showConfirmDialog(this,

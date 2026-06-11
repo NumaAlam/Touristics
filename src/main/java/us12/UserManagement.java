@@ -29,7 +29,7 @@ public class UserManagement extends JFrame {
 
     private void defineFrame (){
         setTitle("Lower Austria Tourist Portal — User Management");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
          setLayout(new BorderLayout());
     }
 
@@ -209,12 +209,14 @@ public class UserManagement extends JFrame {
                 user.setRole(newRole);
                 user.setUsername(newUsername);  // ← neu
                 user.setCanDelete(canDeleteOption == JOptionPane.YES_OPTION);
-                session.merge(user);// ← hier
                 if (resetPw == JOptionPane.YES_OPTION) {
                     String newPassword = JOptionPane.showInputDialog(this, "New Password:");
-                    if (newPassword != null && !newPassword.isBlank()) {
-                        user.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+                    if (!UserValidator.isPasswordValid(newPassword)) {
+                        JOptionPane.showMessageDialog(this, "Password too short (min. 6 characters).",
+                                "Invalid password", JOptionPane.WARNING_MESSAGE);
+                        return;
                     }
+                    user.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
                 }
 
                 tx.commit();
@@ -231,6 +233,11 @@ public class UserManagement extends JFrame {
 
     private void addDeleteButtonFunction(JButton deleteButton) {
         deleteButton.addActionListener(e -> {
+            if (!UserValidator.canDelete(MyApp.Session.canDelete, MyApp.Session.currentRole)) {
+                JOptionPane.showMessageDialog(this, "You don't have permission to delete users.",
+                        "Permission denied", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
                 JOptionPane.showMessageDialog(this, "Please select a user first.",

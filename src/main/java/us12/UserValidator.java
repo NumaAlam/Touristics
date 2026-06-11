@@ -6,7 +6,7 @@ public class UserValidator {
     }
 
     public static boolean isPasswordValid(String password) {
-        return password != null && !password.isBlank();
+        return password != null && password.trim().length() >= 6;
     }
 
     public static boolean canDelete(Boolean canDelete, String role) {

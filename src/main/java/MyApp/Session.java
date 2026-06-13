@@ -8,4 +8,5 @@ public class Session {
     // Stores the hotel ID assigned to the currently logged-in hotel representative.
     // For non-representative users, this value stays null.
     public static Integer currentHotelId = null;
+    public static  Integer currentUserId = null;
 }

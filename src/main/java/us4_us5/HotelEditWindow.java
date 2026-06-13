@@ -99,7 +99,7 @@ public class HotelEditWindow extends JFrame {
     private void addComponents() {
         // Creates a form layout with 11 rows and 2 columns:
         // one label and one text field per hotel master data field.
-        JPanel formPanel = new JPanel(new GridLayout(11, 2, 5, 5));
+        JPanel formPanel = new JPanel(new GridLayout(12, 2, 5, 5));
 
         // Adds all labels and their matching text fields to the form.
         formPanel.add(new JLabel("ID:"));

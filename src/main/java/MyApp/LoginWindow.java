@@ -74,6 +74,12 @@ public class LoginWindow extends JFrame {
                 // US25: Store the assigned hotel ID only for hotel representatives.
                 // Other roles must not keep a hotel restriction from a previous login.
                 if (user.getRole().equals("Hotel Representative")) {
+                    if (user.getHotelID() == null) {
+                        JOptionPane.showMessageDialog(null,
+                                "This representative account has no hotel assigned. Please contact an administrator.",
+                                "No hotel assigned", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     MyApp.Session.currentHotelId = user.getHotelID();
 
                     new HotelRepWindow(user.getHotelID()).setVisible(true);

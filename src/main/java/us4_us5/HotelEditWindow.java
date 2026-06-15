@@ -193,7 +193,7 @@ public class HotelEditWindow extends JFrame {
         buttonPanel.add(closeButton);
 
 
-        if ("Senior".equals(MyApp.Session.currentRole)
+        if ("Senior Admin".equals(MyApp.Session.currentRole)
                 || "Senior_Admin".equals(MyApp.Session.currentRole)
                 || Boolean.TRUE.equals(MyApp.Session.canDelete)) {
             buttonPanel.add(deleteButton);

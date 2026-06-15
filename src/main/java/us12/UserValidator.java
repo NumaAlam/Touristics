@@ -6,10 +6,11 @@ public class UserValidator {
     }
 
     public static boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() >= 6;
+        return password != null && password.trim().length() >= 6 ;
     }
 
     public static boolean canDelete(Boolean canDelete, String role) {
-        return Boolean.TRUE.equals(canDelete) || "Senior".equals(role);
+        return Boolean.TRUE.equals(canDelete);
     }
-}
+    }
+

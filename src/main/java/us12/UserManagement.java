@@ -146,9 +146,12 @@ public class UserManagement extends JFrame {
                 return;
             }
             String password = JOptionPane.showInputDialog(this, "Password:");
-            if (!UserValidator.isPasswordValid(password)) return;
+            if (!UserValidator.isPasswordValid(password)) {
+            JOptionPane.showMessageDialog(this, "Password is to short!!!.", "Duplicate", JOptionPane.WARNING_MESSAGE);
+           return;
+            }
 
-            String[] roles = {"Senior", "Hotel Representative"};
+            String[] roles = {"Senior", "Hotel Representative", "Senior Admin"};
             String role = (String) JOptionPane.showInputDialog(this,
                     "Select Role:", "Role",
                     JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
@@ -203,7 +206,7 @@ public class UserManagement extends JFrame {
                 return;
             }
             // Allow changing the role
-            String[] roles = {"Senior","Hotel Representative"};
+            String[] roles = {"Senior","Hotel Representative", "Senior Admin"};
             String newRole = (String) JOptionPane.showInputDialog(this,
                     "Select new Role:", "Edit Role",
                     JOptionPane.PLAIN_MESSAGE, null, roles, currentRole);
@@ -212,8 +215,10 @@ public class UserManagement extends JFrame {
             // Optionally reset password
             int resetPw = JOptionPane.showConfirmDialog(this,
                     "Reset password?", "Password", JOptionPane.YES_NO_OPTION);
-            int canDeleteOption = JOptionPane.showConfirmDialog(this,
-                    "Grant delete permission?", "Delete Permission", JOptionPane.YES_NO_OPTION);
+            int canDeleteOption = JOptionPane.NO_OPTION;
+                    if("Senior Admin".equals(MyApp.Session.currentRole)){
+                        canDeleteOption = JOptionPane.showConfirmDialog(this,
+                    "Grant delete permission?", "Delete Permission", JOptionPane.YES_NO_OPTION);}
 
 
             Transaction tx = null;

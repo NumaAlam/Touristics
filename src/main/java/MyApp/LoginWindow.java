@@ -94,7 +94,7 @@ public class LoginWindow extends JFrame {
                         new SeniorWindow("Welcome Senior").setVisible(true);
                         dispose();
 
-                    } else if (user.getRole().equals("Senior_Admin")) {
+                    } else if (user.getRole().equals("Senior Admin")) {
                         new SeniorAdminWindow().setVisible(true);
                         dispose();
 

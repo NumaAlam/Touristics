@@ -171,7 +171,25 @@ public class UserManagement extends JFrame {
                 user.setUsername(username);
                 user.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
                 user.setRole(role);
-                user.setHotelID(null); // Admin-type users have no hotel
+                if ("Hotel Representative".equals(role)) {
+                    java.util.List<Hotel> hotels = loadAllHotels();
+                    if (hotels.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "No hotels available to assign.", "No hotels", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    String[] options = new String[hotels.size()];
+                    for (int i = 0; i < hotels.size(); i++) {
+                        options[i] = hotels.get(i).getId() + " - " + hotels.get(i).getName();
+                    }
+                    String chosen = (String) JOptionPane.showInputDialog(this,
+                            "Assign hotel for this representative:", "Assign Hotel",
+                            JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+                    if (chosen == null) return;
+                    int assignedHotelId = hotels.get(java.util.Arrays.asList(options).indexOf(chosen)).getId();
+                    user.setHotelID(assignedHotelId);
+                } else {
+                    user.setHotelID(null);
+                } // Admin-type users have no hotel
 
                 session.persist(user);
                 tx.commit();

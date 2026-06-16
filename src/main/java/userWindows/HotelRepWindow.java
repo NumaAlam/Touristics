@@ -7,7 +7,9 @@ import us4_us5.HotelOverviewWindow;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
+import database.HibernateUtil;
+import hotels.Hotel;
+import org.hibernate.Session;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -141,28 +143,19 @@ public class HotelRepWindow extends JFrame {
 
     private String loadHotelName(int hotelID) {
 
-        String hotelName = "";
+        try (Session session =
+                     HibernateUtil.getSessionFactory().openSession()) {
 
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:sqlserver://185.119.119.126:1433;databaseName=Devparture;encrypt=true;trustServerCertificate=true;",
-                "dev",
-                "dev")) {
+            Hotel hotel = session.get(Hotel.class, hotelID);
 
-            String sql = "SELECT name FROM hotels WHERE id = ?";
-
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, hotelID);
-
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                hotelName = rs.getString("name");
+            if (hotel != null) {
+                return hotel.getName();
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return hotelName;
+        return "";
     }
 }

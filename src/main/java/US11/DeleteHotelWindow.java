@@ -61,8 +61,7 @@ public class DeleteHotelWindow extends JFrame {
     }
 
     private boolean isDeleteAllowed() {
-        return "Senior".equals(MyApp.Session.currentRole)
-                || "Senior_Admin".equals(MyApp.Session.currentRole)
+        return "Senior_Admin".equals(MyApp.Session.currentRole)
                 || Boolean.TRUE.equals(MyApp.Session.canDelete);
     }
 

@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import hotels.Hotel;
 
 public class UserManagement extends JFrame {
 
@@ -118,7 +119,14 @@ public class UserManagement extends JFrame {
             return false;
         }
     }
-
+    // Lädt alle Hotels als Auswahl-Liste "ID - Name" für die Rep-Zuweisung
+    private java.util.List<Hotel> loadAllHotels() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Hotel", Hotel.class).list();
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
+    }
 
 
 
@@ -138,9 +146,12 @@ public class UserManagement extends JFrame {
                 return;
             }
             String password = JOptionPane.showInputDialog(this, "Password:");
-            if (!UserValidator.isPasswordValid(password)) return;
+            if (!UserValidator.isPasswordValid(password)) {
+            JOptionPane.showMessageDialog(this, "Password is to short!!!.", "Duplicate", JOptionPane.WARNING_MESSAGE);
+           return;
+            }
 
-            String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
+            String[] roles = {"Senior", "Hotel Representative", "Senior Admin"};
             String role = (String) JOptionPane.showInputDialog(this,
                     "Select Role:", "Role",
                     JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
@@ -160,7 +171,25 @@ public class UserManagement extends JFrame {
                 user.setUsername(username);
                 user.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
                 user.setRole(role);
-                user.setHotelID(null); // Admin-type users have no hotel
+                if ("Hotel Representative".equals(role)) {
+                    java.util.List<Hotel> hotels = loadAllHotels();
+                    if (hotels.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "No hotels available to assign.", "No hotels", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    String[] options = new String[hotels.size()];
+                    for (int i = 0; i < hotels.size(); i++) {
+                        options[i] = hotels.get(i).getId() + " - " + hotels.get(i).getName();
+                    }
+                    String chosen = (String) JOptionPane.showInputDialog(this,
+                            "Assign hotel for this representative:", "Assign Hotel",
+                            JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+                    if (chosen == null) return;
+                    int assignedHotelId = hotels.get(java.util.Arrays.asList(options).indexOf(chosen)).getId();
+                    user.setHotelID(assignedHotelId);
+                } else {
+                    user.setHotelID(null);
+                } // Admin-type users have no hotel
 
                 session.persist(user);
                 tx.commit();
@@ -195,7 +224,7 @@ public class UserManagement extends JFrame {
                 return;
             }
             // Allow changing the role
-            String[] roles = {"Senior", "Senior_Admin", "Head", "Hotel Representative"};
+            String[] roles = {"Senior","Hotel Representative", "Senior Admin"};
             String newRole = (String) JOptionPane.showInputDialog(this,
                     "Select new Role:", "Edit Role",
                     JOptionPane.PLAIN_MESSAGE, null, roles, currentRole);
@@ -204,8 +233,10 @@ public class UserManagement extends JFrame {
             // Optionally reset password
             int resetPw = JOptionPane.showConfirmDialog(this,
                     "Reset password?", "Password", JOptionPane.YES_NO_OPTION);
-            int canDeleteOption = JOptionPane.showConfirmDialog(this,
-                    "Grant delete permission?", "Delete Permission", JOptionPane.YES_NO_OPTION);
+            int canDeleteOption = JOptionPane.NO_OPTION;
+                    if("Senior Admin".equals(MyApp.Session.currentRole)){
+                        canDeleteOption = JOptionPane.showConfirmDialog(this,
+                    "Grant delete permission?", "Delete Permission", JOptionPane.YES_NO_OPTION);}
 
 
             Transaction tx = null;
@@ -214,6 +245,27 @@ public class UserManagement extends JFrame {
 
                 User user = session.get(User.class, userId);
                 user.setRole(newRole);
+                user.setRole(newRole);
+
+                if ("Hotel Representative".equals(newRole)) {
+                    java.util.List<Hotel> hotels = loadAllHotels();
+                    if (hotels.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "No hotels available to assign.", "No hotels", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    String[] options = new String[hotels.size()];
+                    for (int i = 0; i < hotels.size(); i++) {
+                        options[i] = hotels.get(i).getId() + " - " + hotels.get(i).getName();
+                    }
+                    String chosen = (String) JOptionPane.showInputDialog(this,
+                            "Assign hotel for this representative:", "Assign Hotel",
+                            JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+                    if (chosen == null) return;
+                    int assignedHotelId = hotels.get(java.util.Arrays.asList(options).indexOf(chosen)).getId();
+                    user.setHotelID(assignedHotelId);
+                } else {
+                    user.setHotelID(null);
+                }
                 user.setUsername(newUsername);  // ← neu
                 user.setCanDelete(canDeleteOption == JOptionPane.YES_OPTION);
                 if (resetPw == JOptionPane.YES_OPTION) {

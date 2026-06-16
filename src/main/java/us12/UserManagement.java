@@ -151,7 +151,12 @@ public class UserManagement extends JFrame {
            return;
             }
 
-            String[] roles = {"Senior", "Hotel Representative", "Senior Admin"};
+            String[] roles;
+            if ("Senior Admin".equals(MyApp.Session.currentRole)) {
+                roles = new String[]{"Senior", "Hotel Representative", "Senior Admin"};
+            } else {
+                roles = new String[]{"Senior", "Hotel Representative"};
+            }
             String role = (String) JOptionPane.showInputDialog(this,
                     "Select Role:", "Role",
                     JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
@@ -224,7 +229,12 @@ public class UserManagement extends JFrame {
                 return;
             }
             // Allow changing the role
-            String[] roles = {"Senior","Hotel Representative", "Senior Admin"};
+            String[] roles;
+            if ("Senior Admin".equals(MyApp.Session.currentRole)) {
+                roles = new String[]{"Senior", "Hotel Representative", "Senior Admin"};
+            } else {
+                roles = new String[]{"Senior", "Hotel Representative"};
+            }
             String newRole = (String) JOptionPane.showInputDialog(this,
                     "Select new Role:", "Edit Role",
                     JOptionPane.PLAIN_MESSAGE, null, roles, currentRole);

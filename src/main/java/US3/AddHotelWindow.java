@@ -23,7 +23,6 @@ public class AddHotelWindow extends JFrame {
     private JTextField phoneField;
     private JTextField noRoomField;
     private JTextField noBedField;
-    private JCheckBox gdprConfirmationCheckBox;
     private JPanel panel;
 
     public AddHotelWindow() {
@@ -57,13 +56,7 @@ public class AddHotelWindow extends JFrame {
         noRoomField = new JTextField();
         noBedField = new JTextField();
 
-        gdprConfirmationCheckBox = new JCheckBox(
-                "<html>Please review the entered hotel data carefully before saving. " +
-                        "By confirming, you declare that the information is correct, " +
-                        "that you are authorized to submit or change this data for your assigned hotel, " +
-                        "and that the data may be processed for the purposes of the NOE-TO tourism portal.</html>"
-        );
-        gdprConfirmationCheckBox.setVisible("Hotel Representative".equals(MyApp.Session.currentRole));
+
     }
 
     private void addComponents() {
@@ -91,8 +84,8 @@ public class AddHotelWindow extends JFrame {
         panel.add(noRoomField);
         panel.add(new JLabel("NoBed"));
         panel.add(noBedField);
-        panel.add(new JLabel("Confirmation"));
-        panel.add(gdprConfirmationCheckBox);
+
+
 
         add(panel, BorderLayout.CENTER);
 
@@ -116,14 +109,7 @@ public class AddHotelWindow extends JFrame {
             String noRoom = noRoomField.getText();
             String noBed = noBedField.getText();
 
-            if ("Hotel Representative".equals(MyApp.Session.currentRole)
-                    && !gdprConfirmationCheckBox.isSelected()) {
-                JOptionPane.showMessageDialog(null,
-                        "Please confirm the correctness and authorization statement before saving.",
-                        "Confirmation required",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+
 
             if (HotelValidator.isAnyFieldBlank(category, name, owner, contact, address,
                     city, citycode, phone, noRoom, noBed)) {
